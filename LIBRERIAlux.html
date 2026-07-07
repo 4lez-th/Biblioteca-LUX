@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biblioteca LUX - Selección</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+      color: #e5e7eb;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 2.4rem;
+      color: #f8fafc;
+    }
+
+    .header p {
+      margin: 8px auto 0;
+      max-width: 700px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.25);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(96, 165, 250, 0.45);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin: 0 0 16px;
+      letter-spacing: 0.02em;
+      color: #e2e8f0;
+    }
+
+    .option-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .option input {
+      accent-color: #38bdf8;
+      width: 18px;
+      height: 18px;
+    }
+
+    .option:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .option.selected {
+      border-color: rgba(56, 189, 248, 0.65);
+      background: rgba(56, 189, 248, 0.14);
+    }
+
+    .option label {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #d1d5db;
+    }
+
+    .summary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 18px;
+      padding: 22px;
+      min-height: 200px;
+    }
+
+    .summary h2 {
+      margin-top: 0;
+      color: #f8fafc;
+    }
+
+    .summary p {
+      margin: 8px 0;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 16px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      border: none;
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: #22d3ee;
+    }
+
+    .note {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>Biblioteca LUX</h1>
+      <p>Selecciona las opciones desde los cuadros para gestionar préstamos y consultar el inventario disponible.</p>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Usuarios</h2>
+        <div class="option-list" id="usuario-list">
+          <div class="option" data-value="Alejandro" data-group="usuario">
+            <input type="radio" name="usuario" value="Alejandro" id="usuario-alejandro" />
+            <label for="usuario-alejandro">Alejandro (estudiante)</label>
+          </div>
+          <div class="option" data-value="María" data-group="usuario">
+            <input type="radio" name="usuario" value="María" id="usuario-maria" />
+            <label for="usuario-maria">María (docente)</label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Libros</h2>
+        <div class="option-list" id="libro-list">
+          <div class="option" data-value="Python Básico" data-group="libro">
+            <input type="radio" name="libro" value="Python Básico" id="libro-python" />
+            <label for="libro-python">Python Básico</label>
+          </div>
+          <div class="option" data-value="Bases de Datos" data-group="libro">
+            <input type="radio" name="libro" value="Bases de Datos" id="libro-bd" />
+            <label for="libro-bd">Bases de Datos</label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Acciones</h2>
+        <div class="option-list" id="accion-list">
+          <div class="option" data-value="Prestar" data-group="accion">
+            <input type="radio" name="accion" value="Prestar" id="accion-prestar" />
+            <label for="accion-prestar">Prestar libro</label>
+          </div>
+          <div class="option" data-value="Devolver" data-group="accion">
+            <input type="radio" name="accion" value="Devolver" id="accion-devolver" />
+            <label for="accion-devolver">Devolver libro</label>
+          </div>
+          <div class="option" data-value="Consultar" data-group="accion">
+            <input type="radio" name="accion" value="Consultar" id="accion-consultar" />
+            <label for="accion-consultar">Consultar inventario</label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Categorías</h2>
+        <div class="option-list" id="categoria-list">
+          <div class="option" data-value="Programación" data-group="categoria">
+            <input type="checkbox" name="categoria" value="Programación" id="cat-programacion" />
+            <label for="cat-programacion">Programación</label>
+          </div>
+          <div class="option" data-value="Informática" data-group="categoria">
+            <input type="checkbox" name="categoria" value="Informática" id="cat-informatica" />
+            <label for="cat-informatica">Informática</label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card summary">
+        <h2>Resumen de selección</h2>
+        <p id="resumen-usuario">Usuario: <strong>No seleccionado</strong></p>
+        <p id="resumen-libro">Libro: <strong>No seleccionado</strong></p>
+        <p id="resumen-accion">Acción: <strong>No seleccionada</strong></p>
+        <p id="resumen-categoria">Categorías: <strong>Ninguna</strong></p>
+        <button class="btn" id="btn-accion">Ejecutar acción</button>
+        <p class="note">Este prototipo usa las opciones definidas en la base de datos de ejemplo del sistema.</p>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      usuario: null,
+      libro: null,
+      accion: null,
+      categorias: []
+    };
+
+    function actualizarResumen() {
+      document.getElementById('resumen-usuario').innerHTML = `Usuario: <strong>${state.usuario || 'No seleccionado'}</strong>`;
+      document.getElementById('resumen-libro').innerHTML = `Libro: <strong>${state.libro || 'No seleccionado'}</strong>`;
+      document.getElementById('resumen-accion').innerHTML = `Acción: <strong>${state.accion || 'No seleccionada'}</strong>`;
+      const categoriasTexto = state.categorias.length ? state.categorias.join(', ') : 'Ninguna';
+      document.getElementById('resumen-categoria').innerHTML = `Categorías: <strong>${categoriasTexto}</strong>`;
+    }
+
+    function toggleSelected(element) {
+      const group = element.dataset.group;
+      if (!group) return;
+      const input = element.querySelector('input');
+      if (!input) return;
+
+      if (input.type === 'radio') {
+        const siblings = document.querySelectorAll(`.option[data-group="${group}"]`);
+        siblings.forEach(item => item.classList.remove('selected'));
+        element.classList.add('selected');
+        input.checked = true;
+
+        state[group] = input.value;
+      } else if (input.type === 'checkbox') {
+        input.checked = !input.checked;
+        element.classList.toggle('selected', input.checked);
+        const value = input.value;
+        if (input.checked) {
+          if (!state.categorias.includes(value)) state.categorias.push(value);
+        } else {
+          state.categorias = state.categorias.filter(item => item !== value);
+        }
+      }
+
+      actualizarResumen();
+    }
+
+    document.querySelectorAll('.option').forEach(option => {
+      option.addEventListener('click', () => toggleSelected(option));
+    });
+
+    document.getElementById('btn-accion').addEventListener('click', () => {
+      if (!state.usuario || !state.accion) {
+        alert('Selecciona al menos un usuario y una acción.');
+        return;
+      }
+
+      let mensaje = `Usuario: ${state.usuario}\nAcción: ${state.accion}`;
+      if (state.libro) mensaje += `\nLibro: ${state.libro}`;
+      if (state.categorias.length) mensaje += `\nCategorías: ${state.categorias.join(', ')}`;
+
+      if (state.accion === 'Prestar') {
+        mensaje += '\n\nSe procesaría un préstamo del libro seleccionado si está disponible.';
+      } else if (state.accion === 'Devolver') {
+        mensaje += '\n\nSe procesaría la devolución del libro seleccionado.';
+      } else {
+        mensaje += '\n\nSe mostraría el inventario disponible según categoría.';
+      }
+
+      alert(mensaje);
+    });
+
+    actualizarResumen();
+  </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+# 📚 Sistema de Biblioteca LUX
+# Prototipo en Python
+
+# -----------------------------
+# Módulo de Usuarios
+# -----------------------------
+class Usuario:
+    def __init__(self, id_usuario, nombre, tipo):
+        self.id_usuario = id_usuario
+        self.nombre = nombre
+        self.tipo = tipo  # estudiante, docente, administrativo
+
+    def __str__(self):
+        return f"{self.nombre} ({self.tipo})"
+
+
+# -----------------------------
+# Módulo de Libros / Inventario
+# -----------------------------
+class Libro:
+    def __init__(self, id_libro, titulo, autor, categoria, editorial, palabras_clave):
+        self.id_libro = id_libro
+        self.titulo = titulo
+        self.autor = autor
+        self.categoria = categoria
+        self.editorial = editorial
+        self.palabras_clave = palabras_clave
+        self.disponible = True
+
+    def __str__(self):
+        return f"{self.titulo} - {self.autor} ({'Disponible' if self.disponible else 'Prestado'})"
+
+
+# -----------------------------
+# Módulo de Préstamos
+# -----------------------------
+class Prestamo:
+    def __init__(self, usuario, libro, fecha_prestamo, fecha_devolucion=None):
+        self.usuario = usuario
+        self.libro = libro
+        self.fecha_prestamo = fecha_prestamo
+        self.fecha_devolucion = fecha_devolucion
+
+    def devolver(self, fecha_dev):
+        self.fecha_devolucion = fecha_dev
+        self.libro.disponible = True
+
+
+# -----------------------------
+# Módulo de Reportes
+# -----------------------------
+class Reportes:
+    def __init__(self, prestamos):
+        self.prestamos = prestamos
+
+    def usuarios_activos(self):
+        return set([p.usuario.nombre for p in self.prestamos])
+
+    def libros_mas_solicitados(self):
+        conteo = {}
+        for p in self.prestamos:
+            conteo[p.libro.titulo] = conteo.get(p.libro.titulo, 0) + 1
+        return sorted(conteo.items(), key=lambda x: x[1], reverse=True)
+
+    def inventario_disponible(self, libros):
+        return [libro for libro in libros if libro.disponible]
+
+
+# -----------------------------
+# Ejemplo de uso
+# -----------------------------
+if __name__ == "__main__":
+    # Crear usuarios
+    u1 = Usuario(1, "Alejandro", "estudiante")
+    u2 = Usuario(2, "María", "docente")
+
+    # Crear libros
+    l1 = Libro(101, "Python Básico", "Guido van Rossum", "Programación", "O'Reilly", ["python", "programación"])
+    l2 = Libro(102, "Bases de Datos", "Codd", "Informática", "Pearson", ["SQL", "BD"])
+
+    # Registrar préstamo
+    prestamo1 = Prestamo(u1, l1, "2026-07-04")
+    l1.disponible = False
+
+    # Reportes
+    reportes = Reportes([prestamo1])
+    print("Usuarios activos:", reportes.usuarios_activos())
+    print("Libros más solicitados:", reportes.libros_mas_solicitados())
+    print("Inventario disponible:", reportes.inventario_disponible([l1, l2]))
