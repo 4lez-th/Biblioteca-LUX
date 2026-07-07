@@ -341,11 +341,6 @@
         adminWrap.style.justifyContent = 'center';
         adminWrap.style.gap = '12px';
 
-        const configBtn = document.createElement('button');
-        configBtn.className = 'btn';
-        configBtn.textContent = 'Configurar Supabase';
-        configBtn.onclick = () => showConfigModal();
-
         const adminBtn = document.createElement('button');
         adminBtn.className = 'btn';
         adminBtn.textContent = 'Abrir panel admin';
@@ -356,45 +351,7 @@
         header.appendChild(adminWrap);
       }
 
-      function showConfigModal() {
-        const existing = document.getElementById('supa-config');
-        if (existing) return existing.style.display = 'block';
-
-        const modal = document.createElement('div');
-        modal.id = 'supa-config';
-        Object.assign(modal.style, { position: 'fixed', inset: '20px', background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 });
-        modal.innerHTML = `
-          <div style="background:var(--surface-strong);padding:20px;border-radius:12px;max-width:720px;width:100%;">
-            <h3 style="margin-top:0;color:#fff">Configurar Supabase</h3>
-            <p style="color:var(--muted)">Introduce la URL del proyecto y la anon key pública (será guardada en localStorage).</p>
-            <div style="display:grid;gap:8px;margin-top:12px;">
-              <input id="supa-url" placeholder="https://xyz.supabase.co" style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text)" />
-              <input id="supa-key" placeholder="anon-public-key" style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text)" />
-              <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
-                <button id="supa-save" class="btn">Guardar</button>
-                <button id="supa-close" class="btn">Cerrar</button>
-              </div>
-            </div>
-          </div>`;
-
-        document.body.appendChild(modal);
-        const savedUrl = localStorage.getItem('supa_url') || '';
-        const savedKey = localStorage.getItem('supa_key') || '';
-        modal.querySelector('#supa-url').value = savedUrl;
-        modal.querySelector('#supa-key').value = savedKey;
-
-        modal.querySelector('#supa-close').onclick = () => modal.style.display = 'none';
-        modal.querySelector('#supa-save').onclick = async () => {
-          const url = modal.querySelector('#supa-url').value.trim();
-          const key = modal.querySelector('#supa-key').value.trim();
-          if (!url || !key) { alert('Introduce URL y anon key.'); return; }
-          localStorage.setItem('supa_url', url);
-          localStorage.setItem('supa_key', key);
-          modal.style.display = 'none';
-          await initSupabase();
-          await fetchAndRenderAll();
-        };
-      }
+      // Config modal removed — Supabase config is loaded from localStorage or hardcoded values.
 
       // Panel admin simple para insertar nuevas filas
       function showAdminPanel() {
