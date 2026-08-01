@@ -429,24 +429,6 @@
         });
       }
 
-      // UI: agregar panel admin directo
-      function createAdminPanel() {
-        const header = document.querySelector('.header');
-        const adminWrap = document.createElement('div');
-        adminWrap.style.marginTop = '12px';
-        adminWrap.style.display = 'flex';
-        adminWrap.style.justifyContent = 'center';
-        adminWrap.style.gap = '12px';
-
-        const adminBtn = document.createElement('button');
-        adminBtn.className = 'btn';
-        adminBtn.textContent = 'Abrir panel admin';
-        adminBtn.onclick = () => showAdminPanel();
-
-        adminWrap.appendChild(adminBtn);
-        header.appendChild(adminWrap);
-      }
-
       // Panel admin simple para insertar nuevas filas
       function showAdminPanel() {
         let panel = document.getElementById('admin-panel');
@@ -915,7 +897,6 @@
       }
 
       // inicialización
-      createAdminPanel();
       await initSupabase();
       attachHandlers();
       if (SUPA) {
