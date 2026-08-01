@@ -391,6 +391,7 @@
         <p id="resumen-libro">Libro: <strong>No seleccionado</strong></p>
         <p id="resumen-accion">Acción: <strong>No seleccionada</strong></p>
         <p id="resumen-categoria">Categorías: <strong>Ninguna</strong></p>
+        <div id="action-status" style="display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--text);font-size:0.92rem;line-height:1.5;" aria-live="polite"></div>
         <button class="btn" id="btn-accion">Ejecutar acción</button>
         <p class="note">Este prototipo usa las opciones definidas en la base de datos de ejemplo del sistema.</p>
       </section>
@@ -407,7 +408,37 @@
 
       let SUPA = null; // cliente supabase
 
-      const state = { usuario: null, libro: null, accion: null, categorias: [] };
+      const state = { usuario: null, libro: null, accion: null, categorias: [], busy: false };
+
+      function showStatus(message, type = 'info') {
+        const el = document.getElementById('action-status');
+        if (!el) return;
+        el.textContent = message;
+        el.style.display = 'block';
+        el.style.border = '1px solid rgba(255,255,255,0.08)';
+        el.style.background = type === 'error'
+          ? 'rgba(127, 29, 29, 0.42)'
+          : type === 'success'
+            ? 'rgba(22, 101, 52, 0.42)'
+            : type === 'warning'
+              ? 'rgba(133, 77, 14, 0.42)'
+              : 'rgba(255, 255, 255, 0.06)';
+      }
+
+      function setBusy(isBusy) {
+        state.busy = isBusy;
+        const button = document.getElementById('btn-accion');
+        const searchBtn = document.getElementById('book-search-btn');
+        const clearBtn = document.getElementById('book-clear-btn');
+        const usersBtn = document.getElementById('btn-ver-usuarios');
+        [button, searchBtn, clearBtn, usersBtn].forEach(btn => {
+          if (btn) {
+            btn.disabled = isBusy;
+            btn.style.opacity = isBusy ? '0.7' : '';
+            btn.style.cursor = isBusy ? 'wait' : '';
+          }
+        });
+      }
 
       // UI: agregar panel de configuración/admin
       function createAdminPanel() {
@@ -555,13 +586,20 @@
         } catch (e) {
           SUPA = null;
           console.error('Error init supabase', e);
+          showStatus('No se pudo inicializar Supabase. Revisa la configuración.', 'error');
         }
       }
 
       async function insertRow(table, payload) {
-        if (!SUPA) { alert('Configura Supabase primero.'); return; }
+        if (!SUPA) {
+          showStatus('Configura Supabase antes de agregar registros.', 'warning');
+          return;
+        }
         const { data, error } = await SUPA.from(table).insert([payload]);
-        if (error) console.error(error);
+        if (error) {
+          console.error(error);
+          showStatus(`No se pudo guardar en ${table}.`, 'error');
+        }
         return { data, error };
       }
 
@@ -589,21 +627,37 @@
       }
 
       async function fetchAndRenderAll() {
-        if (!SUPA) return;
+        if (!SUPA) {
+          showStatus('Falta conexión con Supabase. Usa “Configurar Supabase” para continuar.', 'warning');
+          return;
+        }
         await fetchUsuarios();
         await fetchLibros();
         await fetchCategorias();
       }
 
       async function fetchUsuarios() {
-        clearList('usuario-list');
+        const countEl = document.getElementById('usuarios-count');
         const list = document.getElementById('usuario-list');
-        if (!list) return;
+        if (!countEl) return;
         const { data, error } = await SUPA.from('usuarios').select('*').order('id', { ascending: true });
-        if (error) { console.error(error); return; }
+        if (error) {
+          console.error(error);
+          countEl.textContent = '0';
+          showStatus('No se pudieron cargar los usuarios.', 'error');
+          return;
+        }
+        countEl.textContent = data.length || 0;
+        if (!list) return;
+        list.innerHTML = '';
+        if (!data.length) {
+          list.innerHTML = '<div class="option" style="opacity:0.8"><label>No hay usuarios registrados.</label></div>';
+          return;
+        }
         data.forEach(u => {
           const text = `${u.nombre} (${u.tipo})`;
           const opt = makeOption({ id: u.id }, 'usuario', text);
+          opt.dataset.usuarioId = u.id;
           list.appendChild(opt);
         });
       }
@@ -611,16 +665,48 @@
       async function fetchLibros() {
         clearList('libro-list');
         const list = document.getElementById('libro-list');
+        const countEl = document.getElementById('libros-count');
         if (!list) return;
-        const { data, error } = await SUPA.from('libros').select('*').order('id', { ascending: true });
-        if (error) { console.error(error); return; }
+        let query = SUPA.from('libros').select('*').order('id', { ascending: true });
+        if (fetchLibros.searchTerm) {
+          const t = fetchLibros.searchTerm;
+          query = SUPA.from('libros').select('*').or(`titulo.ilike.%${t}%,autor.ilike.%${t}%,categoria.ilike.%${t}%`);
+          try {
+            const { data: kdata } = await SUPA.from('libros').select('*').contains('palabras_clave', [t]);
+            if (kdata && kdata.length) {
+              kdata.forEach(k => {
+                if (!list.querySelector(`[data-id='${k.id}']`)) {
+                  const textk = `${k.titulo}${k.autor ? ' - ' + k.autor : ''}${k.disponible === false ? ' (Prestado)' : ''}`;
+                  const optk = makeOption({ id: k.id }, 'libro', textk);
+                  optk.dataset.libroId = k.id;
+                  optk.dataset.disponible = k.disponible === true || k.disponible === null ? 'true' : 'false';
+                  list.appendChild(optk);
+                }
+              });
+            }
+          } catch (e) { /* ignore */ }
+        }
+        const { data, error } = await query;
+        if (error) {
+          console.error(error);
+          if (countEl) countEl.textContent = '0';
+          showStatus('No se pudieron cargar los libros.', 'error');
+          return;
+        }
+        if (!data.length) {
+          list.innerHTML = '<div class="option" style="opacity:0.8"><label>No hay libros disponibles.</label></div>';
+          if (countEl) countEl.textContent = '0';
+          return;
+        }
         data.forEach(l => {
           const text = `${l.titulo}${l.autor ? ' - ' + l.autor : ''}${l.disponible === false ? ' (Prestado)' : ''}`;
           const opt = makeOption({ id: l.id }, 'libro', text);
+          opt.dataset.id = l.id;
           opt.dataset.libroId = l.id;
           opt.dataset.disponible = l.disponible === true || l.disponible === null ? 'true' : 'false';
           list.appendChild(opt);
         });
+        if (countEl) countEl.textContent = list.children.length;
       }
 
       async function fetchCategorias() {
@@ -674,47 +760,76 @@
       });
 
       async function handleAccion() {
-        if (!state.usuario || !state.accion) { alert('Selecciona al menos un usuario y una acción.'); return; }
+        if (state.busy) return;
+        if (!state.usuario || !state.accion) {
+          showStatus('Selecciona al menos un usuario y una acción.', 'warning');
+          return;
+        }
         const usuario = state.usuario;
         const accion = state.accion;
         const libroId = state.libroId;
 
-        if (!SUPA) { alert('Configura Supabase en "Configurar Supabase" antes de usar.'); return; }
+        if (!SUPA) {
+          showStatus('Configura Supabase antes de usar esta acción.', 'warning');
+          return;
+        }
 
-        if (accion === 'Prestar') {
-          if (!libroId) { alert('Selecciona un libro para prestar.'); return; }
-          // comprobar disponibilidad
-          const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
-          if (libro && libro.disponible === false) { alert('El libro no está disponible.'); return; }
-          // insertar préstamo y marcar libro como no disponible
-          const usuarioRow = await findUsuarioByName(usuario);
-          if (!usuarioRow) { alert('Usuario no encontrado en la base.'); return; }
-          await SUPA.from('prestamos').insert([{ usuario_id: usuarioRow.id, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
-          await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
-          alert('Préstamo registrado.');
-          await fetchLibros();
-        } else if (accion === 'Devolver') {
-          if (!libroId) { alert('Selecciona un libro a devolver.'); return; }
-          const usuarioRow = await findUsuarioByName(usuario);
-          if (!usuarioRow) { alert('Usuario no encontrado.'); return; }
-          // marcar último préstamo sin fecha_devolucion
-          const { data: prestamos } = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).eq('usuario_id', usuarioRow.id).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
-          if (prestamos && prestamos.length) {
-            const pid = prestamos[0].id;
-            await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
+        setBusy(true);
+        try {
+          if (accion === 'Prestar') {
+            if (!libroId) {
+              showStatus('Selecciona un libro para prestar.', 'warning');
+              return;
+            }
+            const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
+            if (libro && libro.disponible === false) {
+              showStatus('El libro seleccionado no está disponible.', 'warning');
+              return;
+            }
+            const usuarioRow = await findUsuarioByName(usuario);
+            if (!usuarioRow) {
+              showStatus('Usuario no encontrado en la base.', 'error');
+              return;
+            }
+            await SUPA.from('prestamos').insert([{ usuario_id: usuarioRow.id, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
+            await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
+            showStatus('Préstamo registrado correctamente.', 'success');
+            await fetchLibros();
+          } else if (accion === 'Devolver') {
+            if (!libroId) {
+              showStatus('Selecciona un libro para devolver.', 'warning');
+              return;
+            }
+            const usuarioRow = await findUsuarioByName(usuario);
+            if (!usuarioRow) {
+              showStatus('Usuario no encontrado.', 'error');
+              return;
+            }
+            const { data: prestamos } = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).eq('usuario_id', usuarioRow.id).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
+            if (prestamos && prestamos.length) {
+              const pid = prestamos[0].id;
+              await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
+            }
+            await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
+            showStatus('Devolución procesada correctamente.', 'success');
+            await fetchLibros();
+          } else {
+            let query = SUPA.from('libros').select('*');
+            if (state.categorias.length) {
+              query = query.in('categoria', state.categorias);
+            }
+            const { data, error } = await query;
+            if (error) {
+              showStatus('No se pudo consultar el inventario.', 'error');
+              return;
+            }
+            const texto = data && data.length
+              ? data.map(x => `${x.titulo} - ${x.autor || ''} (${x.disponible ? 'Disponible' : 'Prestado'})`).join('\n')
+              : 'No hay resultados';
+            showStatus(texto, 'info');
           }
-          await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
-          alert('Devolución procesada.');
-          await fetchLibros();
-        } else {
-          // Consultar inventario según categorías seleccionadas
-          let query = SUPA.from('libros').select('*');
-          if (state.categorias.length) {
-            query = query.in('categoria', state.categorias);
-          }
-          const { data } = await query;
-          let texto = 'Inventario:\n' + (data && data.length ? data.map(x => `${x.titulo} - ${x.autor || ''} (${x.disponible ? 'Disponible' : 'Prestado'})`).join('\n') : 'No hay resultados');
-          alert(texto);
+        } finally {
+          setBusy(false);
         }
       }
 
