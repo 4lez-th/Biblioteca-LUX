@@ -8,15 +8,17 @@
     :root {
       color-scheme: dark;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      --surface: rgba(15, 23, 42, 0.85);
-      --surface-strong: rgba(15, 23, 42, 0.95);
-      --surface-border: rgba(148, 163, 184, 0.18);
-      --accent: #38bdf8;
-      --accent-strong: #22d3ee;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --bg: #090f1f;
-      --card: rgba(255, 255, 255, 0.08);
+      --surface: rgba(18, 24, 34, 0.78);
+      --surface-strong: rgba(28, 35, 48, 0.94);
+      --surface-border: rgba(213, 221, 232, 0.34);
+      --accent: #dfe7ee;
+      --accent-strong: #98a8b7;
+      --accent-deep: #6f7f91;
+      --text: #f5f8fb;
+      --muted: #c0c9d5;
+      --bg: #090b10;
+      --card: rgba(255, 255, 255, 0.07);
+      --shadow-metal: 0 24px 70px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255,255,255,0.35);
     }
 
     * {
@@ -26,9 +28,11 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 26%),
-        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.11), transparent 20%),
-        linear-gradient(135deg, #0b1120 0%, #111827 48%, #0f172a 100%);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,0.16), transparent 16%),
+        radial-gradient(circle at 85% 20%, rgba(150, 170, 190, 0.2), transparent 18%),
+        radial-gradient(circle at 50% 100%, rgba(255,255,255,0.09), transparent 26%),
+        linear-gradient(135deg, #0b0f15 0%, #151a24 42%, #0b0f15 100%);
       color: var(--text);
       overflow-x: hidden;
     }
@@ -37,8 +41,10 @@
       content: '';
       position: fixed;
       inset: 0;
-      background-image: radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 30%),
-        radial-gradient(circle at 80% 80%, rgba(34, 211, 238, 0.08) 0%, transparent 25%);
+      background:
+        linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.04) 38%, transparent 70%),
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 30%),
+        radial-gradient(circle at 80% 80%, rgba(143, 160, 182, 0.12), transparent 24%);
       pointer-events: none;
       z-index: 0;
     }
@@ -46,7 +52,7 @@
     .page {
       position: relative;
       z-index: 1;
-      max-width: 1100px;
+      max-width: 1120px;
       margin: 0 auto;
       padding: 40px 24px 56px;
     }
@@ -58,17 +64,23 @@
 
     .header h1 {
       margin: 0;
-      font-size: clamp(2rem, 4vw, 3rem);
-      letter-spacing: -0.04em;
-      color: #f8fafc;
+      font-size: clamp(2.2rem, 4.8vw, 3.4rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #f8fbff;
+      text-shadow: 0 2px 12px rgba(255,255,255,0.18), 0 12px 40px rgba(0,0,0,0.45);
+      background: linear-gradient(180deg, #ffffff 0%, #bcc7d4 48%, #7b8795 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .header p {
       margin: 16px auto 0;
-      max-width: 720px;
-      color: #cbd5e1;
+      max-width: 760px;
+      color: #d6dee8;
       line-height: 1.75;
       font-size: 1rem;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.32);
     }
 
     .grid {
@@ -86,34 +98,50 @@
     .card {
       position: relative;
       overflow: hidden;
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
+      background:
+        linear-gradient(180deg, rgba(246, 250, 255, 0.09), rgba(24, 29, 40, 0.95)),
+        linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0,0,0,0.22));
+      border: 1px solid rgba(208, 220, 232, 0.34);
       border-radius: 24px;
       padding: 28px;
-      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
-      transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+      box-shadow: var(--shadow-metal);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      backdrop-filter: blur(14px);
     }
 
     .card::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 35%);
+      background:
+        linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.18) 34%, transparent 58%),
+        radial-gradient(circle at top right, rgba(255,255,255,0.1), transparent 40%);
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: 23px;
+      border: 1px solid rgba(255,255,255,0.09);
       pointer-events: none;
     }
 
     .card:hover {
       transform: translateY(-6px);
-      border-color: rgba(56, 189, 248, 0.45);
-      background: rgba(15, 23, 42, 0.98);
+      border-color: rgba(255,255,255,0.58);
+      box-shadow: 0 26px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.5);
     }
 
     .card h2 {
       position: relative;
       margin: 0 0 20px;
       font-size: 1.15rem;
-      letter-spacing: 0.02em;
-      color: #f8fafc;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #ffffff;
       z-index: 1;
     }
 
@@ -122,10 +150,11 @@
       position: absolute;
       left: 0;
       bottom: -8px;
-      width: 56px;
+      width: 60px;
       height: 4px;
       border-radius: 999px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+      background: linear-gradient(90deg, #f8fbff, #9aa7b8, #5f7083);
+      box-shadow: 0 0 18px rgba(255,255,255,0.35);
     }
 
     .option-list {
@@ -140,11 +169,14 @@
       gap: 14px;
       padding: 14px 18px;
       border-radius: 16px;
-      background: rgba(255, 255, 255, 0.04);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.1), rgba(109,121,137,0.16)),
+        rgba(255,255,255,0.04);
       cursor: pointer;
-      border: 1px solid transparent;
-      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      border: 1px solid rgba(221, 229, 238, 0.28);
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
       z-index: 1;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.24);
     }
 
     .option::before {
@@ -152,60 +184,68 @@
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background: rgba(56, 189, 248, 0.35);
+      background: linear-gradient(180deg, #f6fbff, #9ca8b6);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.8), 0 0 10px rgba(255,255,255,0.25);
       flex-shrink: 0;
-      transition: background 0.2s ease, transform 0.2s ease;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .option.selected::before {
-      background: var(--accent);
-      transform: scale(1.1);
+      background: linear-gradient(180deg, #d9e6f4, #7f8ea0);
+      transform: scale(1.12);
+      box-shadow: 0 0 14px rgba(255,255,255,0.4);
     }
 
     .option input {
-      accent-color: var(--accent);
+      accent-color: #f4f7fb;
       width: 18px;
       height: 18px;
       cursor: pointer;
       flex-shrink: 0;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.25));
     }
 
     .option:hover {
       transform: translateY(-1px);
-      background: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(99, 111, 130, 0.22));
+      border-color: rgba(255,255,255,0.56);
     }
 
     .option.selected {
-      border-color: rgba(56, 189, 248, 0.55);
-      background: rgba(56, 189, 248, 0.14);
+      border-color: rgba(255,255,255,0.7);
+      background: linear-gradient(180deg, rgba(255,255,255,0.24), rgba(129,143,162,0.3));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 0 24px rgba(255,255,255,0.12);
     }
 
     .option label {
       margin: 0;
       font-size: 0.97rem;
-      color: #d8e2ef;
+      color: #edf4fb;
       line-height: 1.5;
       cursor: pointer;
     }
 
     .summary {
-      background: rgba(15, 23, 42, 0.96);
-      border: 1px solid rgba(148, 163, 184, 0.22);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(19, 24, 34, 0.96)),
+        rgba(10,14,22,0.98);
+      border: 1px solid rgba(222,228,236,0.34);
       padding: 28px;
       min-height: 260px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.26);
     }
 
     .summary h2 {
       margin-top: 0;
-      color: #f8fafc;
+      color: #f8fbff;
     }
 
     .summary p {
       margin: 12px 0;
-      color: #cbd5e1;
+      color: #d8e1ec;
       line-height: 1.75;
       font-size: 0.98rem;
     }
@@ -222,27 +262,53 @@
       margin-top: 20px;
       padding: 14px 24px;
       border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      color: #0f172a;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(156,168,182,0.18));
+      color: rgba(248, 251, 255, 0.96);
       font-weight: 700;
-      letter-spacing: 0.01em;
-      box-shadow: 0 16px 30px rgba(56, 189, 248, 0.18);
+      letter-spacing: 0.02em;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.36), 0 5px 14px rgba(0,0,0,0.22);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, opacity 0.18s ease;
       z-index: 1;
+      text-transform: uppercase;
+      opacity: 0.9;
     }
 
     .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 20px 35px rgba(56, 189, 248, 0.28);
-      filter: brightness(1.03);
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.48), 0 8px 18px rgba(0,0,0,0.28);
+      background: linear-gradient(180deg, rgba(255,255,255,0.3), rgba(156,168,182,0.24));
+      opacity: 1;
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.99);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 2px 8px rgba(0,0,0,0.24);
     }
 
     .note {
-      color: var(--muted);
+      color: #c8d2de;
       font-size: 0.95rem;
       margin-top: 14px;
+    }
+
+    input[type="text"],
+    input[type="search"],
+    select,
+    textarea {
+      border: 1px solid rgba(219, 228, 237, 0.42);
+      background: rgba(11, 17, 26, 0.7);
+      color: var(--text);
+      border-radius: 10px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #9aa7b5;
     }
   </style>
 </head>
@@ -314,6 +380,7 @@
         <p id="resumen-libro">Libro: <strong>No seleccionado</strong></p>
         <p id="resumen-accion">Acción: <strong>No seleccionada</strong></p>
         <p id="resumen-categoria">Categorías: <strong>Ninguna</strong></p>
+        <div id="action-status" style="display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--text);font-size:0.92rem;line-height:1.5;" aria-live="polite"></div>
         <button class="btn" id="btn-accion">Ejecutar acción</button>
         <p class="note">Este prototipo usa las opciones definidas en la base de datos de ejemplo del sistema.</p>
       </section>
@@ -330,7 +397,37 @@
 
       let SUPA = null; // cliente supabase
 
-      const state = { usuario: null, libro: null, accion: null, categorias: [] };
+      const state = { usuario: null, libro: null, accion: null, categorias: [], busy: false };
+
+      function showStatus(message, type = 'info') {
+        const el = document.getElementById('action-status');
+        if (!el) return;
+        el.textContent = message;
+        el.style.display = 'block';
+        el.style.border = '1px solid rgba(255,255,255,0.08)';
+        el.style.background = type === 'error'
+          ? 'rgba(127, 29, 29, 0.42)'
+          : type === 'success'
+            ? 'rgba(22, 101, 52, 0.42)'
+            : type === 'warning'
+              ? 'rgba(133, 77, 14, 0.42)'
+              : 'rgba(255, 255, 255, 0.06)';
+      }
+
+      function setBusy(isBusy) {
+        state.busy = isBusy;
+        const button = document.getElementById('btn-accion');
+        const searchBtn = document.getElementById('book-search-btn');
+        const clearBtn = document.getElementById('book-clear-btn');
+        const usersBtn = document.getElementById('btn-ver-usuarios');
+        [button, searchBtn, clearBtn, usersBtn].forEach(btn => {
+          if (btn) {
+            btn.disabled = isBusy;
+            btn.style.opacity = isBusy ? '0.7' : '';
+            btn.style.cursor = isBusy ? 'wait' : '';
+          }
+        });
+      }
 
       // UI: agregar panel de configuración/admin
       function createAdminPanel() {
@@ -340,6 +437,11 @@
         adminWrap.style.display = 'flex';
         adminWrap.style.justifyContent = 'center';
         adminWrap.style.gap = '12px';
+
+        const configBtn = document.createElement('button');
+        configBtn.className = 'btn';
+        configBtn.textContent = 'Configurar Supabase';
+        configBtn.onclick = () => showConfigModal();
 
         const adminBtn = document.createElement('button');
         adminBtn.className = 'btn';
@@ -351,7 +453,45 @@
         header.appendChild(adminWrap);
       }
 
-      // Config modal removed — Supabase config is loaded from localStorage or hardcoded values.
+      function showConfigModal() {
+        const existing = document.getElementById('supa-config');
+        if (existing) return existing.style.display = 'block';
+
+        const modal = document.createElement('div');
+        modal.id = 'supa-config';
+        Object.assign(modal.style, { position: 'fixed', inset: '20px', background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 });
+        modal.innerHTML = `
+          <div style="background:var(--surface-strong);padding:20px;border-radius:12px;max-width:720px;width:100%;">
+            <h3 style="margin-top:0;color:#fff">Configurar Supabase</h3>
+            <p style="color:var(--muted)">Introduce la URL del proyecto y la anon key pública (será guardada en localStorage).</p>
+            <div style="display:grid;gap:8px;margin-top:12px;">
+              <input id="supa-url" placeholder="https://xyz.supabase.co" style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text)" />
+              <input id="supa-key" placeholder="anon-public-key" style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text)" />
+              <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+                <button id="supa-save" class="btn">Guardar</button>
+                <button id="supa-close" class="btn">Cerrar</button>
+              </div>
+            </div>
+          </div>`;
+
+        document.body.appendChild(modal);
+        const savedUrl = localStorage.getItem('supa_url') || '';
+        const savedKey = localStorage.getItem('supa_key') || '';
+        modal.querySelector('#supa-url').value = savedUrl;
+        modal.querySelector('#supa-key').value = savedKey;
+
+        modal.querySelector('#supa-close').onclick = () => modal.style.display = 'none';
+        modal.querySelector('#supa-save').onclick = async () => {
+          const url = modal.querySelector('#supa-url').value.trim();
+          const key = modal.querySelector('#supa-key').value.trim();
+          if (!url || !key) { alert('Introduce URL y anon key.'); return; }
+          localStorage.setItem('supa_url', url);
+          localStorage.setItem('supa_key', key);
+          modal.style.display = 'none';
+          await initSupabase();
+          await fetchAndRenderAll();
+        };
+      }
 
       // Panel admin simple para insertar nuevas filas
       function showAdminPanel() {
@@ -454,13 +594,20 @@
         } catch (e) {
           SUPA = null;
           console.error('Error init supabase', e);
+          showStatus('No se pudo inicializar Supabase. Revisa la configuración.', 'error');
         }
       }
 
       async function insertRow(table, payload) {
-        if (!SUPA) { alert('Configura Supabase primero.'); return; }
+        if (!SUPA) {
+          showStatus('Configura Supabase antes de agregar registros.', 'warning');
+          return;
+        }
         const { data, error } = await SUPA.from(table).insert([payload]);
-        if (error) console.error(error);
+        if (error) {
+          console.error(error);
+          showStatus(`No se pudo guardar en ${table}.`, 'error');
+        }
         return { data, error };
       }
 
@@ -488,22 +635,33 @@
       }
 
       async function fetchAndRenderAll() {
-        if (!SUPA) return;
+        if (!SUPA) {
+          showStatus('Falta conexión con Supabase. Usa “Configurar Supabase” para continuar.', 'warning');
+          return;
+        }
         await fetchUsuarios();
         await fetchLibros();
         await fetchCategorias();
       }
 
       async function fetchUsuarios() {
-        // mostrar solo el conteo en la tarjeta; la lista puede expandirse con "Ver usuarios"
         const countEl = document.getElementById('usuarios-count');
         const list = document.getElementById('usuario-list');
         if (!countEl) return;
         const { data, error } = await SUPA.from('usuarios').select('*').order('id', { ascending: true });
-        if (error) { console.error(error); countEl.textContent = '0'; return; }
+        if (error) {
+          console.error(error);
+          countEl.textContent = '0';
+          showStatus('No se pudieron cargar los usuarios.', 'error');
+          return;
+        }
         countEl.textContent = data.length || 0;
         if (!list) return;
         list.innerHTML = '';
+        if (!data.length) {
+          list.innerHTML = '<div class="option" style="opacity:0.8"><label>No hay usuarios registrados.</label></div>';
+          return;
+        }
         data.forEach(u => {
           const text = `${u.nombre} (${u.tipo})`;
           const opt = makeOption({ id: u.id }, 'usuario', text);
@@ -520,24 +678,34 @@
         let query = SUPA.from('libros').select('*').order('id', { ascending: true });
         if (fetchLibros.searchTerm) {
           const t = fetchLibros.searchTerm;
-          // buscar en título, autor, categoría o palabras clave
           query = SUPA.from('libros').select('*').or(`titulo.ilike.%${t}%,autor.ilike.%${t}%,categoria.ilike.%${t}%`);
-          // además intentar coincidencia en palabras clave
           try {
             const { data: kdata } = await SUPA.from('libros').select('*').contains('palabras_clave', [t]);
             if (kdata && kdata.length) {
-              // combinar resultados (simple append)
-              kdata.forEach(k => { if (!list.querySelector(`[data-id='${k.id}']`)) {
-                const textk = `${k.titulo}${k.autor ? ' - ' + k.autor : ''}${k.disponible === false ? ' (Prestado)' : ''}`;
-                const optk = makeOption({ id: k.id }, 'libro', textk);
-                optk.dataset.libroId = k.id; optk.dataset.disponible = k.disponible === true || k.disponible === null ? 'true' : 'false';
-                list.appendChild(optk);
-              } });
+              kdata.forEach(k => {
+                if (!list.querySelector(`[data-id='${k.id}']`)) {
+                  const textk = `${k.titulo}${k.autor ? ' - ' + k.autor : ''}${k.disponible === false ? ' (Prestado)' : ''}`;
+                  const optk = makeOption({ id: k.id }, 'libro', textk);
+                  optk.dataset.libroId = k.id;
+                  optk.dataset.disponible = k.disponible === true || k.disponible === null ? 'true' : 'false';
+                  list.appendChild(optk);
+                }
+              });
             }
           } catch (e) { /* ignore */ }
         }
         const { data, error } = await query;
-        if (error) { console.error(error); if (countEl) countEl.textContent = '0'; return; }
+        if (error) {
+          console.error(error);
+          if (countEl) countEl.textContent = '0';
+          showStatus('No se pudieron cargar los libros.', 'error');
+          return;
+        }
+        if (!data.length) {
+          list.innerHTML = '<div class="option" style="opacity:0.8"><label>No hay libros disponibles.</label></div>';
+          if (countEl) countEl.textContent = '0';
+          return;
+        }
         data.forEach(l => {
           const text = `${l.titulo}${l.autor ? ' - ' + l.autor : ''}${l.disponible === false ? ' (Prestado)' : ''}`;
           const opt = makeOption({ id: l.id }, 'libro', text);
@@ -600,47 +768,76 @@
       });
 
       async function handleAccion() {
-        if (!state.usuario || !state.accion) { alert('Selecciona al menos un usuario y una acción.'); return; }
+        if (state.busy) return;
+        if (!state.usuario || !state.accion) {
+          showStatus('Selecciona al menos un usuario y una acción.', 'warning');
+          return;
+        }
         const usuario = state.usuario;
         const accion = state.accion;
         const libroId = state.libroId;
 
-        if (!SUPA) { alert('Configura Supabase en "Configurar Supabase" antes de usar.'); return; }
+        if (!SUPA) {
+          showStatus('Configura Supabase antes de usar esta acción.', 'warning');
+          return;
+        }
 
-        if (accion === 'Prestar') {
-          if (!libroId) { alert('Selecciona un libro para prestar.'); return; }
-          // comprobar disponibilidad
-          const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
-          if (libro && libro.disponible === false) { alert('El libro no está disponible.'); return; }
-          // insertar préstamo y marcar libro como no disponible
-          const usuarioRow = await findUsuarioByName(usuario);
-          if (!usuarioRow) { alert('Usuario no encontrado en la base.'); return; }
-          await SUPA.from('prestamos').insert([{ usuario_id: usuarioRow.id, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
-          await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
-          alert('Préstamo registrado.');
-          await fetchLibros();
-        } else if (accion === 'Devolver') {
-          if (!libroId) { alert('Selecciona un libro a devolver.'); return; }
-          const usuarioRow = await findUsuarioByName(usuario);
-          if (!usuarioRow) { alert('Usuario no encontrado.'); return; }
-          // marcar último préstamo sin fecha_devolucion
-          const { data: prestamos } = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).eq('usuario_id', usuarioRow.id).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
-          if (prestamos && prestamos.length) {
-            const pid = prestamos[0].id;
-            await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
+        setBusy(true);
+        try {
+          if (accion === 'Prestar') {
+            if (!libroId) {
+              showStatus('Selecciona un libro para prestar.', 'warning');
+              return;
+            }
+            const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
+            if (libro && libro.disponible === false) {
+              showStatus('El libro seleccionado no está disponible.', 'warning');
+              return;
+            }
+            const usuarioRow = await findUsuarioByName(usuario);
+            if (!usuarioRow) {
+              showStatus('Usuario no encontrado en la base.', 'error');
+              return;
+            }
+            await SUPA.from('prestamos').insert([{ usuario_id: usuarioRow.id, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
+            await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
+            showStatus('Préstamo registrado correctamente.', 'success');
+            await fetchLibros();
+          } else if (accion === 'Devolver') {
+            if (!libroId) {
+              showStatus('Selecciona un libro para devolver.', 'warning');
+              return;
+            }
+            const usuarioRow = await findUsuarioByName(usuario);
+            if (!usuarioRow) {
+              showStatus('Usuario no encontrado.', 'error');
+              return;
+            }
+            const { data: prestamos } = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).eq('usuario_id', usuarioRow.id).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
+            if (prestamos && prestamos.length) {
+              const pid = prestamos[0].id;
+              await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
+            }
+            await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
+            showStatus('Devolución procesada correctamente.', 'success');
+            await fetchLibros();
+          } else {
+            let query = SUPA.from('libros').select('*');
+            if (state.categorias.length) {
+              query = query.in('categoria', state.categorias);
+            }
+            const { data, error } = await query;
+            if (error) {
+              showStatus('No se pudo consultar el inventario.', 'error');
+              return;
+            }
+            const texto = data && data.length
+              ? data.map(x => `${x.titulo} - ${x.autor || ''} (${x.disponible ? 'Disponible' : 'Prestado'})`).join('\n')
+              : 'No hay resultados';
+            showStatus(texto, 'info');
           }
-          await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
-          alert('Devolución procesada.');
-          await fetchLibros();
-        } else {
-          // Consultar inventario según categorías seleccionadas
-          let query = SUPA.from('libros').select('*');
-          if (state.categorias.length) {
-            query = query.in('categoria', state.categorias);
-          }
-          const { data } = await query;
-          let texto = 'Inventario:\n' + (data && data.length ? data.map(x => `${x.titulo} - ${x.autor || ''} (${x.disponible ? 'Disponible' : 'Prestado'})`).join('\n') : 'No hay resultados');
-          alert(texto);
+        } finally {
+          setBusy(false);
         }
       }
 

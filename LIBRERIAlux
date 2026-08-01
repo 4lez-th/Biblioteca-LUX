@@ -67,23 +67,10 @@ class Reportes:
 
 
 # -----------------------------
-# Ejemplo de uso
+# Nota
 # -----------------------------
-if __name__ == "__main__":
-    # Crear usuarios
-    u1 = Usuario(1, "Alejandro", "estudiante")
-    u2 = Usuario(2, "María", "docente")
-
-    # Crear libros
-    l1 = Libro(101, "Python Básico", "Guido van Rossum", "Programación", "O'Reilly", ["python", "programación"])
-    l2 = Libro(102, "Bases de Datos", "Codd", "Informática", "Pearson", ["SQL", "BD"])
-
-    # Registrar préstamo
-    prestamo1 = Prestamo(u1, l1, "2026-07-04")
-    l1.disponible = False
-
-    # Reportes
-    reportes = Reportes([prestamo1])
-    print("Usuarios activos:", reportes.usuarios_activos())
-    print("Libros más solicitados:", reportes.libros_mas_solicitados())
-    print("Inventario disponible:", reportes.inventario_disponible([l1, l2]))
+# Este archivo contiene las clases del prototipo (Usuario, Libro, Prestamo, Reportes).
+# Se ha eliminado el bloque de ejemplo para que los datos reales se almacenen en la
+# base de datos (Supabase). Usa la página web (panel Admin) para agregar usuarios,
+# libros y categorías. La lógica del backend o procesos por lotes pueden reutilizar
+# estas clases si se desea, pero en este prototipo la persistencia es vía Supabase.
