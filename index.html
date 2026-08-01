@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Biblioteca LUX - Selección</title>
-  <!-- deployed-at: 2026-07-07T00:00:00Z -->
   <style>
     :root {
       color-scheme: dark;
@@ -290,10 +289,6 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 2px 8px rgba(0,0,0,0.24);
     }
 
-    .btn:active {
-      transform: translateY(0);
-    }
-
     .note {
       color: #c8d2de;
       font-size: 0.95rem;
@@ -325,32 +320,26 @@
     </div>
 
     <div class="grid">
-      <section class="card">
+      <section class="card" id="usuarios-card">
         <h2>Usuarios</h2>
-        <div class="option-list" id="usuario-list">
-          <div class="option" data-value="Alejandro" data-group="usuario">
-            <input type="radio" name="usuario" value="Alejandro" id="usuario-alejandro" />
-            <label for="usuario-alejandro">Alejandro (estudiante)</label>
-          </div>
-          <div class="option" data-value="María" data-group="usuario">
-            <input type="radio" name="usuario" value="María" id="usuario-maria" />
-            <label for="usuario-maria">María (docente)</label>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="color:var(--muted)">Total usuarios: <strong id="usuarios-count">0</strong></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" id="btn-ver-usuarios">Ver usuarios</button>
           </div>
         </div>
+        <div class="option-list" id="usuario-list" style="margin-top:12px;display:none"></div>
       </section>
 
       <section class="card">
         <h2>Libros</h2>
-        <div class="option-list" id="libro-list">
-          <div class="option" data-value="Python Básico" data-group="libro">
-            <input type="radio" name="libro" value="Python Básico" id="libro-python" />
-            <label for="libro-python">Python Básico</label>
-          </div>
-          <div class="option" data-value="Bases de Datos" data-group="libro">
-            <input type="radio" name="libro" value="Bases de Datos" id="libro-bd" />
-            <label for="libro-bd">Bases de Datos</label>
-          </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+          <input id="book-search" placeholder="Buscar por título, autor o palabra clave" style="flex:1;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)" />
+          <button class="btn" id="book-search-btn">Buscar</button>
+          <button class="btn" id="book-clear-btn">Limpiar</button>
         </div>
+        <div style="color:var(--muted);margin-bottom:8px">Total libros: <strong id="libros-count">0</strong></div>
+        <div class="option-list" id="libro-list"></div>
       </section>
 
       <section class="card">
@@ -513,13 +502,14 @@
         Object.assign(panel.style, { position: 'fixed', right: '18px', bottom: '18px', width: '360px', maxHeight: '80vh', overflow: 'auto', background: 'var(--surface)', padding: '16px', borderRadius: '12px', zIndex: 9999, boxShadow: '0 12px 40px rgba(2,6,23,0.6)' });
         panel.innerHTML = `
           <h3 style="margin:0 0 8px;color:#fff">Panel Admin</h3>
-          <p style="color:var(--muted);margin:0 0 12px">Agregar usuarios, libros y categorías al proyecto Supabase.</p>
+          <p style="color:var(--muted);margin:0 0 12px">Agregar usuarios, libros y categorías al proyecto Supabase. También puedes generar libros de ejemplo y procesar préstamos por ID.</p>
           <div style="display:grid;gap:8px">
             <div>
-              <strong style="color:#fff">Usuario</strong>
+              <strong style="color:#fff">Usuario (registro con QR)</strong>
               <input id="adm-user-nombre" placeholder="Nombre" style="width:100%;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <input id="adm-user-tipo" placeholder="Tipo (estudiante/docente)" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
-              <button id="adm-user-save" class="btn" style="margin-top:8px">Agregar Usuario</button>
+              <button id="adm-user-save" class="btn" style="margin-top:8px">Agregar Usuario y generar QR</button>
+              <div id="adm-user-qr" style="margin-top:8px"></div>
             </div>
             <hr/>
             <div>
@@ -527,7 +517,9 @@
               <input id="adm-lib-titulo" placeholder="Título" style="width:100%;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <input id="adm-lib-autor" placeholder="Autor" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <input id="adm-lib-categoria" placeholder="Categoría" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
+              <input id="adm-lib-keywords" placeholder="Palabras clave (coma separadas)" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <button id="adm-lib-save" class="btn" style="margin-top:8px">Agregar Libro</button>
+              <button id="adm-lib-seed" class="btn" style="margin-top:8px">Generar libros de ejemplo</button>
             </div>
             <hr/>
             <div>
@@ -535,7 +527,17 @@
               <input id="adm-cat-nombre" placeholder="Nombre categoría" style="width:100%;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <button id="adm-cat-save" class="btn" style="margin-top:8px">Agregar Categoría</button>
             </div>
-            <div style="display:flex;justify-content:flex-end;margin-top:8px;">\n              <button id="adm-close" class="btn">Cerrar</button>\n            </div>
+            <hr/>
+            <div>
+              <strong style="color:#fff">Procesar préstamo / devolución (por ID)</strong>
+              <select id="adm-loan-lib-select" style="width:100%;padding:8px;border-radius:6px;background:transparent;color:var(--text);margin-top:6px"></select>
+              <input id="adm-loan-userid" placeholder="ID usuario (numérico)" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button id="adm-loan-prestar" class="btn">Prestar</button>
+                <button id="adm-loan-devolver" class="btn">Devolver</button>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:8px;"><button id="adm-close" class="btn">Cerrar</button></div>
           </div>`;
 
         document.body.appendChild(panel);
@@ -546,10 +548,16 @@
           const nombre = panel.querySelector('#adm-user-nombre').value.trim();
           const tipo = panel.querySelector('#adm-user-tipo').value.trim();
           if (!nombre || !tipo) { alert('Rellena nombre y tipo'); return; }
-          await insertRow('usuarios', { nombre, tipo });
+          const res = await insertRow('usuarios', { nombre, tipo });
+          const created = res && res.data && res.data[0] ? res.data[0] : (res.data ? res.data : null);
           panel.querySelector('#adm-user-nombre').value = '';
           panel.querySelector('#adm-user-tipo').value = '';
           await fetchAndRenderAll();
+          if (created && created.id) {
+            const qrUrl = generateQrUrl(`user:${created.id}|name:${created.nombre}`);
+            const qrWrap = panel.querySelector('#adm-user-qr');
+            qrWrap.innerHTML = `<img src="${qrUrl}" alt="QR" style="width:120px;height:120px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)" /><div style="color:var(--muted);font-size:0.9rem;margin-top:6px">ID: ${created.id}</div>`;
+          }
           alert('Usuario agregado');
         };
 
@@ -840,9 +848,87 @@
         return data && data[0];
       }
 
+      // Admin helpers
+      function generateQrUrl(payload) {
+        const data = encodeURIComponent(payload);
+        return `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${data}`;
+      }
+
+      async function seedSampleBooks() {
+        if (!SUPA) { alert('Configura Supabase primero.'); return; }
+        const samples = [
+          { titulo: 'Introducción a Python', autor: 'A. Pérez', categoria: 'Programación', palabras_clave: ['python','programación'], disponible: true },
+          { titulo: 'Estructuras de Datos en JS', autor: 'L. Gómez', categoria: 'Programación', palabras_clave: ['javascript','algoritmos'], disponible: true },
+          { titulo: 'Bases de Datos Relacionales', autor: 'E. Codd', categoria: 'Informática', palabras_clave: ['sql','bd'], disponible: true },
+          { titulo: 'Redes y Comunicaciones', autor: 'M. Ruiz', categoria: 'Informática', palabras_clave: ['redes','tcp'], disponible: true },
+          { titulo: 'Algoritmos y Complejidad', autor: 'D. Knuth', categoria: 'Programación', palabras_clave: ['algoritmos','complejidad'], disponible: true }
+        ];
+        for (const s of samples) {
+          await insertRow('libros', { ...s });
+        }
+        await fetchLibros();
+      }
+
+      async function adminProcessLoan(mode) {
+        if (!SUPA) { alert('Configura Supabase primero.'); return; }
+        const select = document.getElementById('adm-loan-lib-select');
+        const userId = parseInt(document.getElementById('adm-loan-userid').value.trim(),10);
+        if (!select || !select.value) { alert('Selecciona un libro'); return; }
+        if (!userId || isNaN(userId)) { alert('Introduce un ID de usuario válido'); return; }
+        const libroId = parseInt(select.value,10);
+        if (mode === 'prestar') {
+          // comprobar disponibilidad
+          const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
+          if (libro && libro.disponible === false) { alert('El libro no está disponible'); return; }
+          await SUPA.from('prestamos').insert([{ usuario_id: userId, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
+          await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
+          alert('Préstamo creado');
+        } else {
+          // devolver
+          const { data: prestamos } = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).eq('usuario_id', userId).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
+          if (prestamos && prestamos.length) {
+            const pid = prestamos[0].id;
+            await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
+          }
+          await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
+          alert('Devolución procesada');
+        }
+        await fetchLibros();
+        await populateLoanBookSelect();
+      }
+
+      async function populateLoanBookSelect() {
+        const sel = document.getElementById('adm-loan-lib-select');
+        if (!sel) return;
+        sel.innerHTML = '';
+        const { data, error } = await SUPA.from('libros').select('*').order('id', { ascending: true });
+        if (error) return;
+        data.forEach(l => {
+          const opt = document.createElement('option');
+          opt.value = l.id;
+          opt.textContent = `${l.titulo} ${l.autor ? ' - ' + l.autor : ''} ${l.disponible === false ? '(Prestado)' : ''}`;
+          sel.appendChild(opt);
+        });
+      }
+
       // Attach main handlers
       function attachHandlers() {
         document.getElementById('btn-accion').addEventListener('click', handleAccion);
+        document.getElementById('btn-ver-usuarios').addEventListener('click', () => {
+          const list = document.getElementById('usuario-list');
+          if (list.style.display === 'block') { list.style.display = 'none'; return; }
+          list.style.display = 'block';
+        });
+        document.getElementById('book-search-btn').addEventListener('click', async () => {
+          const term = document.getElementById('book-search').value.trim();
+          fetchLibros.searchTerm = term;
+          await fetchLibros();
+        });
+        document.getElementById('book-clear-btn').addEventListener('click', async () => {
+          document.getElementById('book-search').value = '';
+          fetchLibros.searchTerm = null;
+          await fetchLibros();
+        });
         // Delegation for dynamically created options
         ['usuario-list','libro-list','accion-list','categoria-list'].forEach(id => {
           const el = document.getElementById(id);
@@ -854,13 +940,35 @@
             if (id === 'accion-list' && option) state.accion = option.dataset.value || option.textContent.trim();
           });
         });
+          // Admin panel buttons (delegated attach because panel created dynamically)
+          document.addEventListener('click', async (e) => {
+            const target = e.target;
+            if (!target) return;
+            if (target.id === 'adm-lib-seed') {
+              e.preventDefault();
+              await seedSampleBooks();
+              alert('Libros de ejemplo añadidos');
+              await fetchLibros();
+            }
+            if (target.id === 'adm-loan-prestar') {
+              e.preventDefault();
+              await adminProcessLoan('prestar');
+            }
+            if (target.id === 'adm-loan-devolver') {
+              e.preventDefault();
+              await adminProcessLoan('devolver');
+            }
+          });
       }
 
       // inicialización
       createAdminPanel();
       await initSupabase();
       attachHandlers();
-      if (SUPA) await fetchAndRenderAll();
+      if (SUPA) {
+        await fetchAndRenderAll();
+        await populateLoanBookSelect();
+      }
 
     })();
   </script>
