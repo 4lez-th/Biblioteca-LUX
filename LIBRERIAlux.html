@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Biblioteca LUX - Selección</title>
+  <title>Biblioteca LUX - Gestión e Inventario</title>
   <style>
     :root {
       color-scheme: dark;
@@ -85,11 +85,11 @@
 
     .grid {
       display: grid;
-      gap: 22px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      grid-template-columns: 320px minmax(0, 1fr);
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 860px) {
       .grid {
         grid-template-columns: 1fr;
       }
@@ -129,12 +129,6 @@
       pointer-events: none;
     }
 
-    .card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(255,255,255,0.58);
-      box-shadow: 0 26px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.5);
-    }
-
     .card h2 {
       position: relative;
       margin: 0 0 20px;
@@ -166,6 +160,7 @@
       position: relative;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 14px;
       padding: 14px 18px;
       border-radius: 16px;
@@ -179,129 +174,24 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.24);
     }
 
-    .option::before {
-      content: '';
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: linear-gradient(180deg, #f6fbff, #9ca8b6);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.8), 0 0 10px rgba(255,255,255,0.25);
-      flex-shrink: 0;
-      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .option.selected::before {
-      background: linear-gradient(180deg, #d9e6f4, #7f8ea0);
-      transform: scale(1.12);
-      box-shadow: 0 0 14px rgba(255,255,255,0.4);
-    }
-
-    .option input {
-      accent-color: #f4f7fb;
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-      flex-shrink: 0;
-      filter: drop-shadow(0 0 6px rgba(255,255,255,0.25));
-    }
-
     .option:hover {
-      transform: translateY(-1px);
-      background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(99, 111, 130, 0.22));
-      border-color: rgba(255,255,255,0.56);
-    }
-
-    .option.selected {
-      border-color: rgba(255,255,255,0.7);
-      background: linear-gradient(180deg, rgba(255,255,255,0.24), rgba(129,143,162,0.3));
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 0 24px rgba(255,255,255,0.12);
-    }
-
-    .option label {
-      margin: 0;
-      font-size: 0.97rem;
-      color: #edf4fb;
-      line-height: 1.5;
-      cursor: pointer;
-    }
-
-    .summary {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(19, 24, 34, 0.96)),
-        rgba(10,14,22,0.98);
-      border: 1px solid rgba(222,228,236,0.34);
-      padding: 28px;
-      min-height: 260px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 24px 70px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.26);
-    }
-
-    .summary h2 {
-      margin-top: 0;
-      color: #f8fbff;
-    }
-
-    .summary p {
-      margin: 12px 0;
-      color: #d8e1ec;
-      line-height: 1.75;
-      font-size: 0.98rem;
-    }
-
-    .summary p strong {
-      color: #ffffff;
-    }
-
-    .detail-box {
-      margin-top: 16px;
-      padding: 16px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
-    }
-
-    .detail-box h3 {
-      margin: 0 0 10px;
-      font-size: 1rem;
-      color: #ffffff;
-    }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      font-size: 0.92rem;
-      color: #dbe5f0;
-    }
-
-    .detail-item {
-      padding: 10px;
-      background: rgba(6, 11, 18, 0.58);
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .detail-item strong {
-      display: block;
-      margin-bottom: 4px;
-      color: #ffffff;
+      transform: translateY(-2px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(99, 111, 130, 0.26));
+      border-color: rgba(255,255,255,0.6);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 8px 20px rgba(0,0,0,0.3);
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: fit-content;
-      margin-top: 20px;
-      padding: 14px 24px;
+      padding: 12px 22px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(156,168,182,0.18));
-      color: rgba(248, 251, 255, 0.96);
+      border: 1px solid rgba(255,255,255,0.22);
+      background: linear-gradient(180deg, rgba(255,255,255,0.24), rgba(156,168,182,0.2));
+      color: rgba(248, 251, 255, 0.98);
       font-weight: 700;
+      font-size: 0.9rem;
       letter-spacing: 0.02em;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.36), 0 5px 14px rgba(0,0,0,0.22);
       backdrop-filter: blur(18px);
@@ -310,25 +200,21 @@
       transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, opacity 0.18s ease;
       z-index: 1;
       text-transform: uppercase;
-      opacity: 0.9;
     }
 
     .btn:hover {
-      transform: translateY(-2px) scale(1.01);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.48), 0 8px 18px rgba(0,0,0,0.28);
-      background: linear-gradient(180deg, rgba(255,255,255,0.3), rgba(156,168,182,0.24));
-      opacity: 1;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 18px rgba(0,0,0,0.3);
+      background: linear-gradient(180deg, rgba(255,255,255,0.32), rgba(156,168,182,0.28));
     }
 
-    .btn:active {
-      transform: translateY(0) scale(0.99);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 2px 8px rgba(0,0,0,0.24);
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.16);
     }
 
-    .note {
-      color: #c8d2de;
-      font-size: 0.95rem;
-      margin-top: 14px;
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.16);
     }
 
     input[type="text"],
@@ -336,7 +222,7 @@
     select,
     textarea {
       border: 1px solid rgba(219, 228, 237, 0.42);
-      background: rgba(11, 17, 26, 0.7);
+      background: rgba(11, 17, 26, 0.85);
       color: var(--text);
       border-radius: 10px;
       box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
@@ -346,113 +232,240 @@
     textarea::placeholder {
       color: #9aa7b5;
     }
+
+    /* Status Badges */
+    .badge-disponible {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: rgba(34, 197, 94, 0.18);
+      color: #4ade80;
+      border: 1px solid rgba(74, 222, 128, 0.35);
+    }
+
+    .badge-prestado {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: rgba(239, 68, 68, 0.18);
+      color: #f87171;
+      border: 1px solid rgba(248, 113, 113, 0.35);
+    }
+
+    /* Pop-up Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 14, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-container {
+      position: relative;
+      width: 100%;
+      max-width: 660px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: linear-gradient(180deg, rgba(28, 36, 50, 0.98), rgba(14, 19, 28, 0.99));
+      border: 1px solid rgba(220, 230, 242, 0.34);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transform: scale(0.92);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-overlay.active .modal-container {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .modal-close {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #fff;
+      font-size: 1.4rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: scale(1.08);
+    }
+
+    .modal-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .modal-detail-item {
+      padding: 12px;
+      background: rgba(6, 11, 18, 0.6);
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.94rem;
+    }
+
+    .modal-detail-item strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #a3b3c4;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .modal-actions-box {
+      margin-top: 24px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
   </style>
 </head>
 <body>
   <div class="page">
     <div class="header">
       <h1>Biblioteca LUX</h1>
-      <p>Selecciona las opciones desde los cuadros para gestionar préstamos y consultar el inventario disponible.</p>
+      <p>Haz clic en cualquier libro para ver su información completa, consultar inventario y realizar préstamos o devoluciones al instante.</p>
     </div>
 
     <div class="grid">
+      <!-- Columna Izquierda: Usuarios -->
       <section class="card" id="usuarios-card">
         <h2>Usuarios</h2>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
           <div style="color:var(--muted)">Total usuarios: <strong id="usuarios-count">0</strong></div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn" id="btn-ver-usuarios">Ver usuarios</button>
-          </div>
+          <button class="btn btn-secondary" id="btn-ver-usuarios" style="padding:6px 14px;font-size:0.82rem">Ver todos</button>
         </div>
-        <div class="option-list" id="usuario-list" style="margin-top:12px;display:none"></div>
+        <div class="option-list" id="usuario-list" style="display:none"></div>
       </section>
 
+      <!-- Columna Derecha: Libros -->
       <section class="card">
-        <h2>Libros</h2>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
-          <input id="book-search" placeholder="Buscar por título, autor o palabra clave" style="flex:1;min-width:240px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)" />
-          <select id="book-category-filter" style="min-width:180px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+        <h2>Inventario de Libros</h2>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+          <input id="book-search" placeholder="Buscar por título, autor o palabra clave..." style="flex:1;min-width:220px;padding:10px 14px;border-radius:10px;" />
+          <select id="book-category-filter" style="min-width:170px;padding:10px 14px;border-radius:10px;">
             <option value="">Todas las categorías</option>
           </select>
           <button class="btn" id="book-search-btn">Buscar</button>
-          <button class="btn" id="book-clear-btn">Limpiar</button>
+          <button class="btn btn-secondary" id="book-clear-btn">Limpiar</button>
         </div>
-        <div style="color:var(--muted);margin-bottom:8px">Total libros: <strong id="libros-count">0</strong></div>
+        <div style="color:var(--muted);margin-bottom:12px">Total libros disponibles: <strong id="libros-count">0</strong></div>
         <div class="option-list" id="libro-list"></div>
-      </section>
-
-      <section class="card">
-        <h2>Acciones</h2>
-        <div class="option-list" id="accion-list">
-          <div class="option" data-value="Prestar" data-group="accion">
-            <input type="radio" name="accion" value="Prestar" id="accion-prestar" />
-            <label for="accion-prestar">Prestar libro</label>
-          </div>
-          <div class="option" data-value="Devolver" data-group="accion">
-            <input type="radio" name="accion" value="Devolver" id="accion-devolver" />
-            <label for="accion-devolver">Devolver libro</label>
-          </div>
-          <div class="option" data-value="Consultar" data-group="accion">
-            <input type="radio" name="accion" value="Consultar" id="accion-consultar" />
-            <label for="accion-consultar">Consultar inventario</label>
-          </div>
-        </div>
-      </section>
-
-      <section class="card summary">
-        <h2>Resumen de selección</h2>
-        <p id="resumen-usuario">Usuario: <strong>No seleccionado</strong></p>
-        <p id="resumen-libro">Libro: <strong>No seleccionado</strong></p>
-        <p id="resumen-accion">Acción: <strong>No seleccionada</strong></p>
-        <p id="resumen-categoria">Filtro de categoría: <strong>Todas</strong></p>
-        <div id="book-detail-box" class="detail-box" style="display:none"></div>
-        <div id="action-status" style="display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--text);font-size:0.92rem;line-height:1.5;white-space:pre-line;" aria-live="polite"></div>
-        <button class="btn" id="btn-accion">Ejecutar acción</button>
-        <p class="note">Este prototipo usa las opciones definidas en la base de datos de ejemplo del sistema.</p>
       </section>
     </div>
   </div>
 
+  <!-- Pop-up Modal para Información del Libro y Acciones -->
+  <div class="modal-overlay" id="book-modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div>
+          <h2 id="modal-book-title" style="margin:0 0 6px;color:#fff;font-size:1.4rem">Cargando libro...</h2>
+          <div id="modal-book-author" style="color:var(--muted);font-size:0.98rem">—</div>
+        </div>
+        <button class="modal-close" id="modal-close-btn" title="Cerrar">&times;</button>
+      </div>
+
+      <div class="modal-detail-grid">
+        <div class="modal-detail-item"><strong>Categoría</strong><span id="modal-book-category">—</span></div>
+        <div class="modal-detail-item"><strong>Editorial</strong><span id="modal-book-editorial">—</span></div>
+        <div class="modal-detail-item"><strong>Estado Inventario</strong><span id="modal-book-status-badge">—</span></div>
+        <div class="modal-detail-item"><strong>Préstamos Activos</strong><span id="modal-book-loans-count">0</span></div>
+        <div class="modal-detail-item" style="grid-column:1/-1;"><strong>Palabras Clave</strong><span id="modal-book-keywords">—</span></div>
+      </div>
+
+      <!-- Sección de Préstamos Activos -->
+      <div id="modal-active-loans-box" style="display:none;margin-bottom:20px;padding:14px;background:rgba(255,255,255,0.04);border-radius:14px;border:1px solid rgba(255,255,255,0.08)">
+        <h4 style="margin:0 0 8px;color:#fff;font-size:0.92rem">Información de Préstamo Activo:</h4>
+        <div id="modal-active-loans-content" style="font-size:0.9rem;color:var(--muted)"></div>
+      </div>
+
+      <!-- Sección de Acciones (Prestar / Devolver) -->
+      <div class="modal-actions-box">
+        <h3 style="margin:0 0 12px;color:#fff;font-size:1.05rem">Gestionar Préstamo</h3>
+        <div style="margin-bottom:14px;">
+          <label for="modal-user-select" style="display:block;margin-bottom:6px;color:#c0c9d5;font-size:0.88rem">Seleccionar Usuario:</label>
+          <select id="modal-user-select" style="width:100%;padding:10px 12px;border-radius:10px;"></select>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn" id="modal-btn-prestar" style="flex:1;min-width:140px">Prestar Libro</button>
+          <button class="btn btn-secondary" id="modal-btn-devolver" style="flex:1;min-width:140px">Devolver Libro</button>
+        </div>
+
+        <div id="modal-status" style="display:none;margin-top:14px;padding:12px;border-radius:10px;font-size:0.9rem;line-height:1.5;white-space:pre-line;" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Carga dinámica del cliente de Supabase (UMD)
     (async function () {
       const supaScript = document.createElement('script');
       supaScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js';
       document.head.appendChild(supaScript);
       await new Promise(resolve => { supaScript.onload = resolve; supaScript.onerror = resolve; });
 
-      let SUPA = null; // cliente supabase
+      let SUPA = null;
+      let currentBookId = null;
 
-      const state = { usuario: null, usuarioId: null, libro: null, libroId: null, accion: null, categorias: [], busy: false };
+      const state = { busy: false };
 
-      function showStatus(message, type = 'info') {
-        const el = document.getElementById('action-status');
+      function showModalStatus(message, type = 'info') {
+        const el = document.getElementById('modal-status');
         if (!el) return;
         el.textContent = message;
         el.style.display = 'block';
-        el.style.border = '1px solid rgba(255,255,255,0.08)';
+        el.style.border = '1px solid rgba(255,255,255,0.1)';
         el.style.background = type === 'error'
-          ? 'rgba(127, 29, 29, 0.42)'
+          ? 'rgba(127, 29, 29, 0.45)'
           : type === 'success'
-            ? 'rgba(22, 101, 52, 0.42)'
+            ? 'rgba(22, 101, 52, 0.45)'
             : type === 'warning'
-              ? 'rgba(133, 77, 14, 0.42)'
-              : 'rgba(255, 255, 255, 0.06)';
-      }
-
-      function setBusy(isBusy) {
-        state.busy = isBusy;
-        const button = document.getElementById('btn-accion');
-        const searchBtn = document.getElementById('book-search-btn');
-        const clearBtn = document.getElementById('book-clear-btn');
-        const usersBtn = document.getElementById('btn-ver-usuarios');
-        [button, searchBtn, clearBtn, usersBtn].forEach(btn => {
-          if (btn) {
-            btn.disabled = isBusy;
-            btn.style.opacity = isBusy ? '0.7' : '';
-            btn.style.cursor = isBusy ? 'wait' : '';
-          }
-        });
+              ? 'rgba(133, 77, 14, 0.45)'
+              : 'rgba(255, 255, 255, 0.08)';
       }
 
       function createAdminPanel() {
@@ -474,7 +487,6 @@
         let panel = document.getElementById('admin-panel');
         if (panel) {
           panel.style.display = 'block';
-          await populateLoanBookSelect();
           return;
         }
         panel = document.createElement('aside');
@@ -489,7 +501,6 @@
               <input id="adm-user-nombre" placeholder="Nombre" style="width:100%;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <input id="adm-user-tipo" placeholder="Tipo (estudiante/docente)" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <button id="adm-user-save" class="btn" style="margin-top:8px">Agregar Usuario</button>
-              <div id="adm-user-qr" style="margin-top:8px"></div>
             </div>
             <hr/>
             <div>
@@ -505,83 +516,40 @@
               <input id="adm-cat-nombre" placeholder="Nombre categoría" style="width:100%;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <button id="adm-cat-save" class="btn" style="margin-top:8px">Agregar Categoría</button>
             </div>
-            <hr/>
-            <div>
-              <strong style="color:#fff">Préstamo rápido</strong>
-              <select id="adm-loan-lib-select" style="width:100%;padding:8px;border-radius:6px;background:transparent;color:var(--text);margin-top:6px"></select>
-              <input id="adm-loan-userid" placeholder="ID usuario (numérico)" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
-              <div style="display:flex;gap:8px;margin-top:8px">
-                <button id="adm-loan-prestar" class="btn">Prestar</button>
-                <button id="adm-loan-devolver" class="btn">Devolver</button>
-              </div>
-            </div>
             <div style="display:flex;justify-content:flex-end;margin-top:8px;"><button id="adm-close" class="btn">Cerrar</button></div>
           </div>`;
 
         document.body.appendChild(panel);
-        await populateLoanBookSelect();
-
         panel.querySelector('#adm-close').onclick = () => panel.style.display = 'none';
 
         panel.querySelector('#adm-user-save').onclick = async () => {
           const nombre = panel.querySelector('#adm-user-nombre').value.trim();
           const tipo = panel.querySelector('#adm-user-tipo').value.trim();
-          if (!nombre || !tipo) {
-            showStatus('Rellena nombre y tipo del usuario.', 'warning');
-            return;
-          }
-          const res = await insertRow('usuarios', { nombre, tipo });
-          const created = res && res.data && res.data[0] ? res.data[0] : (res.data ? res.data : null);
+          if (!nombre || !tipo) return;
+          await insertRow('usuarios', { nombre, tipo });
           panel.querySelector('#adm-user-nombre').value = '';
           panel.querySelector('#adm-user-tipo').value = '';
           await fetchAndRenderAll();
-          if (res && res.error) {
-            showStatus('No se pudo guardar el usuario en Supabase.', 'error');
-            return;
-          }
-          if (created && created.id) {
-            const qrUrl = generateQrUrl(`user:${created.id}|name:${created.nombre}`);
-            const qrWrap = panel.querySelector('#adm-user-qr');
-            qrWrap.innerHTML = `<img src="${qrUrl}" alt="QR" style="width:120px;height:120px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)" /><div style="color:var(--muted);font-size:0.9rem;margin-top:6px">ID: ${created.id}</div>`;
-          }
-          showStatus('Usuario agregado y enviado a Supabase.', 'success');
         };
 
         panel.querySelector('#adm-lib-save').onclick = async () => {
           const titulo = panel.querySelector('#adm-lib-titulo').value.trim();
           const autor = panel.querySelector('#adm-lib-autor').value.trim();
           const categoria = panel.querySelector('#adm-lib-categoria').value.trim();
-          if (!titulo) {
-            showStatus('El título del libro es obligatorio.', 'warning');
-            return;
-          }
-          const payload = { titulo, autor, categoria, disponible: true };
-          const res = await insertRow('libros', payload);
+          if (!titulo) return;
+          await insertRow('libros', { titulo, autor, categoria, disponible: true });
           panel.querySelector('#adm-lib-titulo').value = '';
           panel.querySelector('#adm-lib-autor').value = '';
           panel.querySelector('#adm-lib-categoria').value = '';
           await fetchAndRenderAll();
-          if (res && res.error) {
-            showStatus('No se pudo guardar el libro en Supabase.', 'error');
-            return;
-          }
-          showStatus('Libro agregado y enviado a Supabase.', 'success');
         };
 
         panel.querySelector('#adm-cat-save').onclick = async () => {
           const nombre = panel.querySelector('#adm-cat-nombre').value.trim();
-          if (!nombre) {
-            showStatus('La categoría necesita un nombre.', 'warning');
-            return;
-          }
-          const res = await insertRow('categorias', { nombre });
+          if (!nombre) return;
+          await insertRow('categorias', { nombre });
           panel.querySelector('#adm-cat-nombre').value = '';
           await fetchAndRenderAll();
-          if (res && res.error) {
-            showStatus('No se pudo guardar la categoría en Supabase.', 'error');
-            return;
-          }
-          showStatus('Categoría agregada y enviada a Supabase.', 'success');
         };
       }
 
@@ -593,72 +561,20 @@
         } catch (e) {
           SUPA = null;
           console.error('Error init supabase', e);
-          showStatus('No se pudo inicializar Supabase en esta sesión.', 'error');
         }
       }
 
       async function insertRow(table, payload) {
-        if (!SUPA) {
-          showStatus('Falta conexión con Supabase para escribir.', 'warning');
-          return { data: null, error: new Error('SUPA not available') };
-        }
+        if (!SUPA) return { data: null, error: new Error('SUPA not available') };
         const { data, error } = await SUPA.from(table).insert([payload]).select();
-        if (error) {
-          console.error(error);
-          showStatus(`No se pudo guardar en ${table}.`, 'error');
-        }
         return { data, error };
       }
 
-      function clearList(id) { const el = document.getElementById(id); if (el) el.innerHTML = ''; }
-
-      function makeOption(item, group, labelText) {
-        const div = document.createElement('div');
-        div.className = 'option';
-        div.dataset.group = group;
-        div.dataset.id = item.id || item.id_libro || item.id_usuario || '';
-        div.dataset.value = labelText;
-
-        const input = document.createElement('input');
-        input.type = item.inputType || (group === 'categoria' ? 'checkbox' : 'radio');
-        input.name = group;
-        input.value = labelText;
-        const id = `${group}-${Math.random().toString(36).slice(2,8)}`;
-        input.id = id;
-
-        const label = document.createElement('label');
-        label.htmlFor = id;
-        label.textContent = labelText;
-
-        div.appendChild(input);
-        div.appendChild(label);
-        return div;
-      }
-
       async function fetchAndRenderAll() {
-        if (!SUPA) {
-          showStatus('Falta conexión con Supabase en esta sesión.', 'warning');
-          return;
-        }
+        if (!SUPA) return;
         await fetchUsuarios();
         await fetchLibros();
         await fetchCategorias();
-      }
-
-      function getLoanLimitDays(loan) {
-        return Number(loan?.dias_limite || 7);
-      }
-
-      function getLoanDueDate(loan) {
-        const date = new Date(loan.fecha_prestamo || new Date().toISOString().slice(0, 10));
-        date.setDate(date.getDate() + getLoanLimitDays(loan));
-        return date.toISOString().slice(0, 10);
-      }
-
-      function isLoanLate(loan) {
-        if (loan.fecha_devolucion) return false;
-        const due = new Date(getLoanDueDate(loan) + 'T23:59:59');
-        return new Date() > due;
       }
 
       async function fetchUsuarios() {
@@ -666,26 +582,18 @@
         const list = document.getElementById('usuario-list');
         if (!countEl) return;
         const { data: users, error: usersError } = await SUPA.from('usuarios').select('*').order('id', { ascending: true });
-        if (usersError) {
-          console.error(usersError);
-          countEl.textContent = '0';
-          showStatus('No se pudieron cargar los usuarios.', 'error');
-          return;
-        }
+        if (usersError) return;
+
         countEl.textContent = users.length || 0;
         if (!list) return;
         list.innerHTML = '';
         if (!users.length) {
-          list.innerHTML = '<div class="option" style="opacity:0.8"><label>No hay usuarios registrados.</label></div>';
+          list.innerHTML = '<div style="opacity:0.8;padding:8px">No hay usuarios registrados.</div>';
           return;
         }
 
         const userIds = users.map(u => u.id);
-        const { data: loansData, error: loansError } = await SUPA.from('prestamos').select('*').in('usuario_id', userIds).is('fecha_devolucion', null).order('id', { ascending: true });
-        if (loansError) {
-          console.error(loansError);
-          showStatus('No se pudieron cargar los préstamos activos.', 'error');
-        }
+        const { data: loansData } = await SUPA.from('prestamos').select('*').in('usuario_id', userIds).is('fecha_devolucion', null);
 
         const loansByUser = new Map();
         (loansData || []).forEach(loan => {
@@ -694,480 +602,264 @@
           loansByUser.set(loan.usuario_id, arr);
         });
 
-        const libroIds = [...new Set((loansData || []).map(loan => loan.libro_id).filter(Boolean))];
-        const bookMap = new Map();
-        if (libroIds.length) {
-          const { data: booksData } = await SUPA.from('libros').select('*').in('id', libroIds);
-          (booksData || []).forEach(book => bookMap.set(book.id, book));
-        }
-
         users.forEach(u => {
           const loans = loansByUser.get(u.id) || [];
-          const cards = loans.length
-            ? loans.map(loan => {
-                const book = bookMap.get(loan.libro_id);
-                const dueDate = getLoanDueDate(loan);
-                const late = isLoanLate(loan);
-                return `
-                  <div style="padding:6px 0;border-top:1px solid rgba(255,255,255,0.08);font-size:0.88rem">
-                    <div><strong>${book?.titulo || 'Libro sin título'}</strong></div>
-                    <div style="color:var(--muted);font-size:0.82rem">Prestado: ${loan.fecha_prestamo || '—'} · Límite: ${dueDate}</div>
-                    <div style="margin-top:2px;color:${late ? '#ffb4b4' : '#c7f2c6'};font-size:0.82rem;font-weight:600">${late ? 'A destiempo' : 'En tiempo'}</div>
-                  </div>`;
-              }).join('')
-            : '<div style="padding:4px 0;color:var(--muted);font-size:0.85rem">Sin préstamos activos</div>';
-
-          const card = document.createElement('div');
-          card.className = 'option';
-          card.dataset.group = 'usuario';
-          card.dataset.id = u.id;
-          card.dataset.value = u.nombre;
-          card.style.display = 'block';
-          card.style.padding = '12px';
-
-          const uid = `usr-${u.id}`;
-          card.innerHTML = `
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-              <input type="radio" name="usuario" id="${uid}" value="${u.nombre}" style="cursor:pointer" />
-              <label for="${uid}" style="font-weight:700;cursor:pointer;flex:1">${u.nombre} <span style="color:var(--muted);font-weight:400">(${u.tipo})</span></label>
+          const item = document.createElement('div');
+          item.className = 'option';
+          item.style.cursor = 'default';
+          item.innerHTML = `
+            <div>
+              <div style="font-weight:700">${u.nombre} <span style="color:var(--muted);font-weight:400">(${u.tipo})</span></div>
+              <div style="color:var(--muted);font-size:0.85rem">Préstamos activos: ${loans.length}</div>
             </div>
-            <div style="color:var(--muted);font-size:0.86rem;margin-bottom:4px;padding-left:28px">Préstamos activos: ${loans.length}</div>
-            <div style="padding-left:28px">${cards}</div>
+            <div style="color:var(--muted);font-size:0.82rem;font-weight:600">ID: ${u.id}</div>
           `;
-          list.appendChild(card);
+          list.appendChild(item);
         });
       }
 
       function isSampleBookRecord(book) {
         const title = String(book?.titulo || '').toLowerCase();
-        const author = String(book?.autor || '').toLowerCase();
-        const category = String(book?.categoria || '').toLowerCase();
         return title.startsWith('libro_sample_') || title.startsWith('libroprestamo_sample_');
       }
 
       async function fetchLibros() {
-        clearList('libro-list');
         const list = document.getElementById('libro-list');
         const countEl = document.getElementById('libros-count');
         if (!list) return;
+        list.innerHTML = '';
 
         const categoryFilter = fetchLibros.category || document.getElementById('book-category-filter')?.value || '';
         const searchTerm = fetchLibros.searchTerm || '';
 
         let query = SUPA.from('libros').select('*').order('id', { ascending: true });
 
-        if (categoryFilter) {
-          query = query.eq('categoria', categoryFilter);
-        }
-
-        if (searchTerm) {
-          query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,categoria.ilike.%${searchTerm}%`);
-        }
+        if (categoryFilter) query = query.eq('categoria', categoryFilter);
+        if (searchTerm) query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,categoria.ilike.%${searchTerm}%`);
 
         const { data, error } = await query;
         if (error) {
-          console.error(error);
           if (countEl) countEl.textContent = '0';
-          showStatus('No se pudieron cargar los libros.', 'error');
           return;
         }
 
         let realData = (data || []).filter(book => !isSampleBookRecord(book));
 
-        if (searchTerm) {
-          try {
-            let kQuery = SUPA.from('libros').select('*').contains('palabras_clave', [searchTerm]);
-            if (categoryFilter) kQuery = kQuery.eq('categoria', categoryFilter);
-            const { data: kdata } = await kQuery;
-            if (kdata && kdata.length) {
-              const existingIds = new Set(realData.map(b => b.id));
-              kdata.forEach(k => {
-                if (!isSampleBookRecord(k) && !existingIds.has(k.id)) {
-                  realData.push(k);
-                  existingIds.add(k.id);
-                }
-              });
-            }
-          } catch (e) { /* ignore */ }
-        }
-
         if (!realData.length) {
-          list.innerHTML = '<div class="option" style="opacity:0.8"><label>No hay libros disponibles.</label></div>';
+          list.innerHTML = '<div style="opacity:0.8;padding:12px">No hay libros disponibles.</div>';
           if (countEl) countEl.textContent = '0';
           return;
         }
 
         realData.forEach(l => {
-          const text = `${l.titulo}${l.autor ? ' - ' + l.autor : ''}${l.disponible === false ? ' (Prestado)' : ''}`;
-          const opt = makeOption({ id: l.id }, 'libro', text);
-          opt.dataset.id = l.id;
-          opt.dataset.libroId = l.id;
-          opt.dataset.disponible = l.disponible === true || l.disponible === null ? 'true' : 'false';
-          list.appendChild(opt);
+          const isDisponible = l.disponible !== false;
+          const div = document.createElement('div');
+          div.className = 'option';
+          div.dataset.id = l.id;
+          div.innerHTML = `
+            <div>
+              <div style="font-weight:700;font-size:1.02rem;color:#fff">${l.titulo}</div>
+              <div style="color:var(--muted);font-size:0.88rem">${l.autor || 'Autor no especificado'}</div>
+            </div>
+            <span class="${isDisponible ? 'badge-disponible' : 'badge-prestado'}">${isDisponible ? 'Disponible' : 'Prestado'}</span>
+          `;
+          div.addEventListener('click', () => openBookModal(l.id));
+          list.appendChild(div);
         });
 
         if (countEl) countEl.textContent = realData.length;
       }
 
-      function isSampleCategoryRecord(category) {
-        const name = String(category?.nombre || '').toLowerCase();
-        return name.includes('cat_sample_');
-      }
-
       async function fetchCategorias() {
         const categorySelect = document.getElementById('book-category-filter');
         const { data, error } = await SUPA.from('categorias').select('*').order('id', { ascending: true });
-        if (error) { console.error(error); return; }
+        if (error || !categorySelect) return;
 
-        if (categorySelect) {
-          const currentValue = categorySelect.value;
-          categorySelect.innerHTML = '<option value="">Todas las categorías</option>';
-          (data || []).filter(category => !isSampleCategoryRecord(category)).forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.nombre;
-            opt.textContent = c.nombre;
-            categorySelect.appendChild(opt);
-          });
-          if (currentValue) categorySelect.value = currentValue;
-        }
+        const currentValue = categorySelect.value;
+        categorySelect.innerHTML = '<option value="">Todas las categorías</option>';
+        (data || []).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.nombre;
+          opt.textContent = c.nombre;
+          categorySelect.appendChild(opt);
+        });
+        if (currentValue) categorySelect.value = currentValue;
       }
 
-      function actualizarResumen() {
-        document.getElementById('resumen-usuario').innerHTML = `Usuario: <strong>${state.usuario || 'No seleccionado'}</strong>`;
-        document.getElementById('resumen-libro').innerHTML = `Libro: <strong>${state.libro || 'No seleccionado'}</strong>`;
-        document.getElementById('resumen-accion').innerHTML = `Acción: <strong>${state.accion || 'No seleccionada'}</strong>`;
-        const categoryFilterVal = document.getElementById('book-category-filter')?.value;
-        const categoriasTexto = state.categorias.length 
-          ? state.categorias.join(', ') 
-          : (categoryFilterVal ? categoryFilterVal : 'Todas');
-        document.getElementById('resumen-categoria').innerHTML = `Categorías: <strong>${categoriasTexto}</strong>`;
-      }
+      // POP-UP MODAL CONTROLLER
+      async function openBookModal(bookId) {
+        currentBookId = bookId;
+        const overlay = document.getElementById('book-modal-overlay');
+        const statusBox = document.getElementById('modal-status');
+        statusBox.style.display = 'none';
 
-      async function renderBookDetail(bookId) {
-        const box = document.getElementById('book-detail-box');
-        if (!box) return;
-        if (!bookId || !SUPA) {
-          box.style.display = 'none';
-          return;
-        }
+        // 1. Obtener detalles del libro
         const { data: book, error } = await SUPA.from('libros').select('*').eq('id', bookId).single();
-        if (error || !book) {
-          box.style.display = 'none';
-          return;
-        }
-        const { data: loansData } = await SUPA.from('prestamos').select('*').eq('libro_id', bookId).is('fecha_devolucion', null);
-        const activeLoans = loansData || [];
-        const inventoryState = book.disponible !== false && activeLoans.length === 0 ? 'Disponible' : 'Prestado';
+        if (error || !book) return;
+
+        document.getElementById('modal-book-title').textContent = book.titulo;
+        document.getElementById('modal-book-author').textContent = book.autor ? `por ${book.autor}` : 'Autor no especificado';
+        document.getElementById('modal-book-category').textContent = book.categoria || '—';
+        document.getElementById('modal-book-editorial').textContent = book.editorial || '—';
+
+        const isDisponible = book.disponible !== false;
+        const badgeEl = document.getElementById('modal-book-status-badge');
+        badgeEl.className = isDisponible ? 'badge-disponible' : 'badge-prestado';
+        badgeEl.textContent = isDisponible ? 'Disponible' : 'Prestado';
+
         const keywords = Array.isArray(book.palabras_clave) ? book.palabras_clave.join(', ') : (book.palabras_clave || '—');
-        box.innerHTML = `
-          <h3>Detalle del libro</h3>
-          <div class="detail-grid">
-            <div class="detail-item"><strong>Título</strong>${book.titulo || '—'}</div>
-            <div class="detail-item"><strong>Autor</strong>${book.autor || '—'}</div>
-            <div class="detail-item"><strong>Categoría</strong>${book.categoria || '—'}</div>
-            <div class="detail-item"><strong>Editorial</strong>${book.editorial || '—'}</div>
-            <div class="detail-item"><strong>Inventario</strong>${inventoryState}</div>
-            <div class="detail-item"><strong>Préstamos activos</strong>${activeLoans.length}</div>
-            <div class="detail-item" style="grid-column:1/-1;"><strong>Palabras clave</strong>${keywords}</div>
-            <div class="detail-item" style="grid-column:1/-1;"><strong>Resumen</strong>Usuario: ${state.usuario || 'No seleccionado'} · Acción: ${state.accion || 'No seleccionada'} · Categorías: ${state.categorias.length ? state.categorias.join(', ') : 'Ninguna'}</div>
-          </div>`;
-        box.style.display = 'block';
-      }
+        document.getElementById('modal-book-keywords').textContent = keywords;
 
-      function toggleSelected(element) {
-        const group = element.dataset.group;
-        if (!group) return;
+        // 2. Cargar préstamos activos del libro
+        const { data: loans } = await SUPA.from('prestamos').select('*, usuarios(nombre)').eq('libro_id', bookId).is('fecha_devolucion', null);
+        const activeLoans = loans || [];
+        document.getElementById('modal-book-loans-count').textContent = activeLoans.length;
 
-        const input = element.querySelector('input');
+        const loansBox = document.getElementById('modal-active-loans-box');
+        const loansContent = document.getElementById('modal-active-loans-content');
 
-        if (group === 'usuario' || group === 'libro' || group === 'accion') {
-          const siblings = document.querySelectorAll(`.option[data-group="${group}"]`);
-          siblings.forEach(item => {
-            item.classList.remove('selected');
-            const itemInput = item.querySelector('input');
-            if (itemInput) itemInput.checked = false;
+        if (activeLoans.length) {
+          loansBox.style.display = 'block';
+          loansContent.innerHTML = activeLoans.map(l => `
+            <div><strong>Prestado a:</strong> ${l.usuarios?.nombre || 'Usuario ID: ' + l.usuario_id}</div>
+            <div><strong>Fecha Préstamo:</strong> ${l.fecha_prestamo || '—'}</div>
+          `).join('<hr style="border-color:rgba(255,255,255,0.08);margin:6px 0"/>');
+        } else {
+          loansBox.style.display = 'none';
+        }
+
+        // 3. Cargar lista de usuarios en el selector del modal
+        const userSelect = document.getElementById('modal-user-select');
+        userSelect.innerHTML = '';
+        const { data: users } = await SUPA.from('usuarios').select('*').order('nombre', { ascending: true });
+        if (users && users.length) {
+          users.forEach(u => {
+            const opt = document.createElement('option');
+            opt.value = u.id;
+            opt.textContent = `${u.nombre} (${u.tipo})`;
+            userSelect.appendChild(opt);
           });
-          element.classList.add('selected');
-          if (input) input.checked = true;
+        } else {
+          userSelect.innerHTML = '<option value="">No hay usuarios disponibles</option>';
+        }
 
-          state[group] = element.dataset.value || (input ? input.value : '');
-          if (group === 'usuario') {
-            state.usuarioId = element.dataset.id || null;
-          } else if (group === 'libro') {
-            state.libroId = element.dataset.id || element.dataset.libroId || element.dataset.libroid || null;
-          }
-        } else if (group === 'categoria') {
-          const isSelected = element.classList.toggle('selected');
-          if (input) input.checked = isSelected;
-          const value = element.dataset.value || (input ? input.value : '');
-          if (isSelected) {
-            if (!state.categorias.includes(value)) state.categorias.push(value);
-          } else {
-            state.categorias = state.categorias.filter(item => item !== value);
-          }
-        }
-        actualizarResumen();
-        if (group === 'libro' && state.libroId) {
-          renderBookDetail(state.libroId);
-        }
+        // Ajustar botones según estado
+        document.getElementById('modal-btn-prestar').disabled = !isDisponible;
+        document.getElementById('modal-btn-devolver').disabled = isDisponible && activeLoans.length === 0;
+
+        overlay.classList.add('active');
       }
 
-      async function handleAccion() {
-        if (state.busy) return;
-        if (!state.usuario || !state.accion) {
-          showStatus('Selecciona al menos un usuario y una acción.', 'warning');
-          return;
-        }
-        const usuario = state.usuario;
-        const usuarioId = state.usuarioId;
-        const accion = state.accion;
-        const libroId = state.libroId;
+      function closeModal() {
+        const overlay = document.getElementById('book-modal-overlay');
+        overlay.classList.remove('active');
+        currentBookId = null;
+      }
 
-        if (!SUPA) {
-          showStatus('Configura Supabase antes de usar esta acción.', 'warning');
+      async function handleModalPrestar() {
+        if (!currentBookId || !SUPA) return;
+        const userSelect = document.getElementById('modal-user-select');
+        const userId = userSelect.value;
+        if (!userId) {
+          showModalStatus('Por favor selecciona un usuario.', 'warning');
           return;
         }
 
-        setBusy(true);
-        try {
-          if (accion === 'Prestar') {
-            if (!libroId) {
-              showStatus('Selecciona un libro para prestar.', 'warning');
-              return;
-            }
+        // Intentar RPC en Supabase
+        const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_prestar_libro', {
+          p_usuario_id: parseInt(userId, 10),
+          p_libro_id: parseInt(currentBookId, 10)
+        });
 
-            let finalUserId = usuarioId;
-            if (!finalUserId) {
-              const uRow = await findUsuarioByName(usuario);
-              finalUserId = uRow ? uRow.id : null;
-            }
-
-            if (!finalUserId) {
-              showStatus('Usuario no encontrado en la base de datos.', 'error');
-              return;
-            }
-
-            // 1. Intentar RPC atómico en Supabase
-            const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_prestar_libro', {
-              p_usuario_id: parseInt(finalUserId, 10),
-              p_libro_id: parseInt(libroId, 10)
-            });
-
-            if (!rpcErr && rpcRes) {
-              if (rpcRes.success) {
-                showStatus(`✓ ${rpcRes.message} (Libro: ${rpcRes.libro_titulo})`, 'success');
-              } else {
-                showStatus(`⚠️ ${rpcRes.message}`, 'warning');
-              }
-            } else {
-              // Fallback directo
-              const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
-              if (libro && libro.disponible === false) {
-                showStatus('El libro seleccionado no está disponible.', 'warning');
-                return;
-              }
-              await SUPA.from('prestamos').insert([{ usuario_id: finalUserId, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
-              await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
-              showStatus('Préstamo registrado correctamente.', 'success');
-            }
-
-            await fetchAndRenderAll();
-
-          } else if (accion === 'Devolver') {
-            if (!libroId) {
-              showStatus('Selecciona un libro para devolver.', 'warning');
-              return;
-            }
-
-            let finalUserId = usuarioId;
-            if (!finalUserId) {
-              const uRow = await findUsuarioByName(usuario);
-              finalUserId = uRow ? uRow.id : null;
-            }
-
-            // 1. Intentar RPC atómico en Supabase
-            const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_devolver_libro', {
-              p_libro_id: parseInt(libroId, 10),
-              p_usuario_id: finalUserId ? parseInt(finalUserId, 10) : null
-            });
-
-            if (!rpcErr && rpcRes) {
-              if (rpcRes.success) {
-                const estado = rpcRes.a_tiempo !== undefined ? (rpcRes.a_tiempo ? 'Devuelto a tiempo.' : 'Devuelto a destiempo.') : '';
-                showStatus(`✓ ${rpcRes.message} ${estado}`, 'success');
-              } else {
-                showStatus(`⚠️ ${rpcRes.message}`, 'warning');
-              }
-            } else {
-              // Fallback directo
-              let query = SUPA.from('prestamos').select('*').eq('libro_id', libroId).is('fecha_devolucion', null);
-              if (finalUserId) query = query.eq('usuario_id', finalUserId);
-              const { data: prestamos } = await query.order('id', { ascending: false }).limit(1);
-
-              if (prestamos && prestamos.length) {
-                const pid = prestamos[0].id;
-                await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
-              }
-              await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
-              showStatus('Devolución procesada correctamente.', 'success');
-            }
-
-            await fetchAndRenderAll();
-
+        if (!rpcErr && rpcRes) {
+          if (rpcRes.success) {
+            showModalStatus(`✓ ${rpcRes.message}`, 'success');
           } else {
-            // Consultar inventario
-            const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_consultar_inventario', {
-              p_categorias: state.categorias.length ? state.categorias : null,
-              p_busqueda: fetchLibros.searchTerm || null
-            });
-
-            let librosList = [];
-            if (!rpcErr && rpcRes) {
-              librosList = rpcRes;
-            } else {
-              let query = SUPA.from('libros').select('*');
-              if (state.categorias.length) query = query.in('categoria', state.categorias);
-              if (fetchLibros.searchTerm) {
-                const t = fetchLibros.searchTerm;
-                query = query.or(`titulo.ilike.%${t}%,autor.ilike.%${t}%,categoria.ilike.%${t}%`);
-              }
-              const { data } = await query;
-              librosList = data || [];
-            }
-
-            const realLibros = librosList.filter(x => !isSampleBookRecord(x));
-            const texto = realLibros.length
-              ? realLibros.map(x => `• ${x.titulo}${x.autor ? ' - ' + x.autor : ''} (${x.disponible ? 'Disponible' : 'Prestado'})`).join('\n')
-              : 'No hay libros que coincidan con la consulta.';
-            showStatus(`Resultados del Inventario (${realLibros.length}):\n${texto}`, 'info');
-          }
-        } finally {
-          setBusy(false);
-        }
-      }
-
-      async function findUsuarioByName(text) {
-        if (!SUPA) return null;
-        const name = text.split(' (')[0];
-        const { data } = await SUPA.from('usuarios').select('*').ilike('nombre', name + '%').limit(1);
-        return data && data[0];
-      }
-
-      // Admin helpers
-      function generateQrUrl(payload) {
-        const data = encodeURIComponent(payload);
-        return `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${data}`;
-      }
-
-      async function adminProcessLoan(mode) {
-        if (!SUPA) { alert('Configura Supabase primero.'); return; }
-        const select = document.getElementById('adm-loan-lib-select');
-        const userId = parseInt(document.getElementById('adm-loan-userid').value.trim(), 10);
-        if (!select || !select.value) { alert('Selecciona un libro'); return; }
-        if (!userId || isNaN(userId)) { alert('Introduce un ID de usuario válido'); return; }
-        const libroId = parseInt(select.value, 10);
-
-        if (mode === 'prestar') {
-          const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_prestar_libro', {
-            p_usuario_id: userId,
-            p_libro_id: libroId
-          });
-          if (!rpcErr && rpcRes) {
-            alert(rpcRes.message);
-          } else {
-            const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
-            if (libro && libro.disponible === false) { alert('El libro no está disponible'); return; }
-            await SUPA.from('prestamos').insert([{ usuario_id: userId, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
-            await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
-            alert('Préstamo creado');
+            showModalStatus(`⚠️ ${rpcRes.message}`, 'warning');
           }
         } else {
-          const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_devolver_libro', {
-            p_libro_id: libroId,
-            p_usuario_id: userId
-          });
-          if (!rpcErr && rpcRes) {
-            alert(rpcRes.message);
-          } else {
-            const { data: prestamos } = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).eq('usuario_id', userId).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
-            if (prestamos && prestamos.length) {
-              const pid = prestamos[0].id;
-              await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
-            }
-            await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
-            alert('Devolución procesada');
-          }
+          // Fallback directo
+          await SUPA.from('prestamos').insert([{ usuario_id: userId, libro_id: currentBookId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
+          await SUPA.from('libros').update({ disponible: false }).eq('id', currentBookId);
+          showModalStatus('✓ Préstamo registrado correctamente.', 'success');
         }
+
         await fetchAndRenderAll();
-        await populateLoanBookSelect();
+        await openBookModal(currentBookId);
       }
 
-      async function populateLoanBookSelect() {
-        const sel = document.getElementById('adm-loan-lib-select');
-        if (!sel) return;
-        sel.innerHTML = '';
-        const { data, error } = await SUPA.from('libros').select('*').order('id', { ascending: true });
-        if (error) return;
-        data.forEach(l => {
-          const opt = document.createElement('option');
-          opt.value = l.id;
-          opt.textContent = `${l.titulo} ${l.autor ? ' - ' + l.autor : ''} ${l.disponible === false ? '(Prestado)' : ''}`;
-          sel.appendChild(opt);
+      async function handleModalDevolver() {
+        if (!currentBookId || !SUPA) return;
+        const userSelect = document.getElementById('modal-user-select');
+        const userId = userSelect.value;
+
+        // Intentar RPC en Supabase
+        const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_devolver_libro', {
+          p_libro_id: parseInt(currentBookId, 10),
+          p_usuario_id: userId ? parseInt(userId, 10) : null
         });
+
+        if (!rpcErr && rpcRes) {
+          if (rpcRes.success) {
+            showModalStatus(`✓ ${rpcRes.message}`, 'success');
+          } else {
+            showModalStatus(`⚠️ ${rpcRes.message}`, 'warning');
+          }
+        } else {
+          // Fallback directo
+          let query = SUPA.from('prestamos').select('*').eq('libro_id', currentBookId).is('fecha_devolucion', null);
+          if (userId) query = query.eq('usuario_id', userId);
+          const { data: prestamos } = await query.order('id', { ascending: false }).limit(1);
+
+          if (prestamos && prestamos.length) {
+            await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', prestamos[0].id);
+          }
+          await SUPA.from('libros').update({ disponible: true }).eq('id', currentBookId);
+          showModalStatus('✓ Devolución procesada correctamente.', 'success');
+        }
+
+        await fetchAndRenderAll();
+        await openBookModal(currentBookId);
       }
 
-      // Attach main handlers
+      // Listeners
       function attachHandlers() {
-        document.getElementById('btn-accion').addEventListener('click', handleAccion);
         document.getElementById('btn-ver-usuarios').addEventListener('click', () => {
           const list = document.getElementById('usuario-list');
-          if (list.style.display === 'block') { list.style.display = 'none'; return; }
-          list.style.display = 'block';
+          list.style.display = list.style.display === 'grid' || list.style.display === 'block' ? 'none' : 'grid';
         });
+
         document.getElementById('book-search-btn').addEventListener('click', async () => {
-          const term = document.getElementById('book-search').value.trim();
-          const category = document.getElementById('book-category-filter')?.value || '';
-          fetchLibros.searchTerm = term;
-          fetchLibros.category = category;
+          fetchLibros.searchTerm = document.getElementById('book-search').value.trim();
+          fetchLibros.category = document.getElementById('book-category-filter')?.value || '';
           await fetchLibros();
         });
+
         document.getElementById('book-clear-btn').addEventListener('click', async () => {
           document.getElementById('book-search').value = '';
-          const categorySelect = document.getElementById('book-category-filter');
-          if (categorySelect) categorySelect.value = '';
+          const select = document.getElementById('book-category-filter');
+          if (select) select.value = '';
           fetchLibros.searchTerm = null;
           fetchLibros.category = null;
           await fetchLibros();
         });
+
         document.getElementById('book-category-filter')?.addEventListener('change', async (e) => {
           fetchLibros.category = e.target.value;
-          actualizarResumen();
           await fetchLibros();
         });
 
-        // Delegation for dynamically created options
-        ['usuario-list','libro-list','accion-list'].forEach(id => {
-          const el = document.getElementById(id);
-          if (!el) return;
-          el.addEventListener('click', (e) => {
-            const option = e.target.closest('.option');
-            if (option) toggleSelected(option);
-          });
+        // Modal listeners
+        document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+        document.getElementById('book-modal-overlay').addEventListener('click', (e) => {
+          if (e.target.id === 'book-modal-overlay') closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') closeModal();
         });
 
-        // Admin panel buttons
-        document.addEventListener('click', async (e) => {
-          const target = e.target;
-          if (!target) return;
-          if (target.id === 'adm-loan-prestar') {
-            e.preventDefault();
-            await adminProcessLoan('prestar');
-          }
-          if (target.id === 'adm-loan-devolver') {
-            e.preventDefault();
-            await adminProcessLoan('devolver');
-          }
-        });
+        document.getElementById('modal-btn-prestar').addEventListener('click', handleModalPrestar);
+        document.getElementById('modal-btn-devolver').addEventListener('click', handleModalDevolver);
       }
 
       // Inicialización
@@ -1176,9 +868,7 @@
       attachHandlers();
       if (SUPA) {
         await fetchAndRenderAll();
-        await populateLoanBookSelect();
       }
-
     })();
   </script>
 </body>
