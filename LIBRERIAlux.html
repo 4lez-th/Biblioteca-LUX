@@ -86,7 +86,7 @@
     .grid {
       display: grid;
       gap: 24px;
-      grid-template-columns: 320px minmax(0, 1fr);
+      grid-template-columns: 340px minmax(0, 1fr);
     }
 
     @media (max-width: 860px) {
@@ -367,7 +367,7 @@
   <div class="page">
     <div class="header">
       <h1>Biblioteca LUX</h1>
-      <p>Haz clic en cualquier libro para ver su información completa, consultar inventario y realizar préstamos o devoluciones al instante.</p>
+      <p>Haz clic en cualquier libro o usuario para ver su información completa, prestamos activos y gestionar préstamos al instante.</p>
     </div>
 
     <div class="grid">
@@ -376,9 +376,8 @@
         <h2>Usuarios</h2>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
           <div style="color:var(--muted)">Total usuarios: <strong id="usuarios-count">0</strong></div>
-          <button class="btn btn-secondary" id="btn-ver-usuarios" style="padding:6px 14px;font-size:0.82rem">Ver todos</button>
         </div>
-        <div class="option-list" id="usuario-list" style="display:none"></div>
+        <div class="option-list" id="usuario-list"></div>
       </section>
 
       <!-- Columna Derecha: Libros -->
@@ -406,7 +405,7 @@
           <h2 id="modal-book-title" style="margin:0 0 6px;color:#fff;font-size:1.4rem">Cargando libro...</h2>
           <div id="modal-book-author" style="color:var(--muted);font-size:0.98rem">—</div>
         </div>
-        <button class="modal-close" id="modal-close-btn" title="Cerrar">&times;</button>
+        <button class="modal-close" id="modal-book-close-btn" title="Cerrar">&times;</button>
       </div>
 
       <div class="modal-detail-grid">
@@ -441,6 +440,29 @@
     </div>
   </div>
 
+  <!-- Pop-up Modal para Información del Usuario -->
+  <div class="modal-overlay" id="user-modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div>
+          <h2 id="modal-user-name" style="margin:0 0 6px;color:#fff;font-size:1.4rem">Cargando usuario...</h2>
+          <div id="modal-user-type" style="color:var(--muted);font-size:0.98rem">—</div>
+        </div>
+        <button class="modal-close" id="modal-user-close-btn" title="Cerrar">&times;</button>
+      </div>
+
+      <div class="modal-detail-grid">
+        <div class="modal-detail-item"><strong>ID Usuario</strong><span id="modal-user-id">—</span></div>
+        <div class="modal-detail-item"><strong>Préstamos Activos</strong><span id="modal-user-loans-count">0</span></div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <h3 style="margin:0 0 12px;color:#fff;font-size:1.05rem">Libros Prestados Actuales:</h3>
+        <div id="modal-user-loans-list"></div>
+      </div>
+    </div>
+  </div>
+
   <script>
     (async function () {
       const supaScript = document.createElement('script');
@@ -450,8 +472,7 @@
 
       let SUPA = null;
       let currentBookId = null;
-
-      const state = { busy: false };
+      let currentUserId = null;
 
       function showModalStatus(message, type = 'info') {
         const el = document.getElementById('modal-status');
@@ -466,6 +487,22 @@
             : type === 'warning'
               ? 'rgba(133, 77, 14, 0.45)'
               : 'rgba(255, 255, 255, 0.08)';
+      }
+
+      function getLoanLimitDays(loan) {
+        return Number(loan?.dias_limite || 7);
+      }
+
+      function getLoanDueDate(loan) {
+        const date = new Date(loan.fecha_prestamo || new Date().toISOString().slice(0, 10));
+        date.setDate(date.getDate() + getLoanLimitDays(loan));
+        return date.toISOString().slice(0, 10);
+      }
+
+      function isLoanLate(loan) {
+        if (loan.fecha_devolucion) return false;
+        const due = new Date(getLoanDueDate(loan) + 'T23:59:59');
+        return new Date() > due;
       }
 
       function createAdminPanel() {
@@ -606,14 +643,14 @@
           const loans = loansByUser.get(u.id) || [];
           const item = document.createElement('div');
           item.className = 'option';
-          item.style.cursor = 'default';
           item.innerHTML = `
             <div>
               <div style="font-weight:700">${u.nombre} <span style="color:var(--muted);font-weight:400">(${u.tipo})</span></div>
               <div style="color:var(--muted);font-size:0.85rem">Préstamos activos: ${loans.length}</div>
             </div>
-            <div style="color:var(--muted);font-size:0.82rem;font-weight:600">ID: ${u.id}</div>
+            <div style="color:var(--muted);font-size:0.82rem;font-weight:600">Ver ficha &rarr;</div>
           `;
+          item.addEventListener('click', () => openUserModal(u.id));
           list.appendChild(item);
         });
       }
@@ -686,14 +723,13 @@
         if (currentValue) categorySelect.value = currentValue;
       }
 
-      // POP-UP MODAL CONTROLLER
+      // POP-UP MODAL CONTROLLER DE LIBROS
       async function openBookModal(bookId) {
         currentBookId = bookId;
         const overlay = document.getElementById('book-modal-overlay');
         const statusBox = document.getElementById('modal-status');
         statusBox.style.display = 'none';
 
-        // 1. Obtener detalles del libro
         const { data: book, error } = await SUPA.from('libros').select('*').eq('id', bookId).single();
         if (error || !book) return;
 
@@ -710,7 +746,7 @@
         const keywords = Array.isArray(book.palabras_clave) ? book.palabras_clave.join(', ') : (book.palabras_clave || '—');
         document.getElementById('modal-book-keywords').textContent = keywords;
 
-        // 2. Cargar préstamos activos del libro
+        // Cargar préstamos activos
         const { data: loans } = await SUPA.from('prestamos').select('*, usuarios(nombre)').eq('libro_id', bookId).is('fecha_devolucion', null);
         const activeLoans = loans || [];
         document.getElementById('modal-book-loans-count').textContent = activeLoans.length;
@@ -728,32 +764,136 @@
           loansBox.style.display = 'none';
         }
 
-        // 3. Cargar lista de usuarios en el selector del modal
+        // Cargar usuarios en el desplegable
         const userSelect = document.getElementById('modal-user-select');
         userSelect.innerHTML = '';
         const { data: users } = await SUPA.from('usuarios').select('*').order('nombre', { ascending: true });
+
+        // Si hay préstamo activo, seleccionar por defecto el usuario que lo tiene
+        const activeUserId = activeLoans.length ? activeLoans[0].usuario_id : null;
+
         if (users && users.length) {
           users.forEach(u => {
             const opt = document.createElement('option');
             opt.value = u.id;
             opt.textContent = `${u.nombre} (${u.tipo})`;
+            if (activeUserId && u.id == activeUserId) opt.selected = true;
             userSelect.appendChild(opt);
           });
         } else {
           userSelect.innerHTML = '<option value="">No hay usuarios disponibles</option>';
         }
 
-        // Ajustar botones según estado
         document.getElementById('modal-btn-prestar').disabled = !isDisponible;
         document.getElementById('modal-btn-devolver').disabled = isDisponible && activeLoans.length === 0;
 
         overlay.classList.add('active');
       }
 
-      function closeModal() {
-        const overlay = document.getElementById('book-modal-overlay');
-        overlay.classList.remove('active');
+      // POP-UP MODAL CONTROLLER DE USUARIOS
+      async function openUserModal(userId) {
+        currentUserId = userId;
+        const overlay = document.getElementById('user-modal-overlay');
+        if (!overlay || !SUPA) return;
+
+        const { data: user, error } = await SUPA.from('usuarios').select('*').eq('id', userId).single();
+        if (error || !user) return;
+
+        document.getElementById('modal-user-name').textContent = user.nombre;
+        document.getElementById('modal-user-type').textContent = `Tipo: ${user.tipo}`;
+        document.getElementById('modal-user-id').textContent = user.id;
+
+        const { data: loans } = await SUPA.from('prestamos').select('*').eq('usuario_id', userId).is('fecha_devolucion', null);
+        const activeLoans = loans || [];
+        document.getElementById('modal-user-loans-count').textContent = activeLoans.length;
+
+        const loansListEl = document.getElementById('modal-user-loans-list');
+        loansListEl.innerHTML = '';
+
+        if (!activeLoans.length) {
+          loansListEl.innerHTML = '<div style="color:var(--muted);padding:14px;background:rgba(255,255,255,0.03);border-radius:14px">Este usuario no tiene préstamos activos actualmente.</div>';
+        } else {
+          const libroIds = activeLoans.map(l => l.libro_id).filter(Boolean);
+          const bookMap = new Map();
+          if (libroIds.length) {
+            const { data: books } = await SUPA.from('libros').select('*').in('id', libroIds);
+            (books || []).forEach(b => bookMap.set(b.id, b));
+          }
+
+          activeLoans.forEach(loan => {
+            const book = bookMap.get(loan.libro_id);
+            const dueDate = getLoanDueDate(loan);
+            const late = isLoanLate(loan);
+
+            const div = document.createElement('div');
+            div.style.cssText = 'padding:14px;background:rgba(6,11,18,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;';
+            div.innerHTML = `
+              <div>
+                <div style="font-weight:700;color:#fff;font-size:1.02rem">${book?.titulo || 'Libro sin título'}</div>
+                <div style="color:var(--muted);font-size:0.86rem;margin-top:2px">${book?.autor ? 'Autor: ' + book.autor : ''} ${book?.categoria ? '· Categoría: ' + book.categoria : ''}</div>
+                <div style="color:var(--muted);font-size:0.84rem;margin-top:4px">
+                  Fecha Préstamo: <strong>${loan.fecha_prestamo || '—'}</strong> &bull; Límite: <strong>${dueDate}</strong>
+                </div>
+                <div style="margin-top:6px">
+                  <span class="${late ? 'badge-prestado' : 'badge-disponible'}">${late ? 'A destiempo' : 'En tiempo'}</span>
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-devolver-directo" style="padding:8px 14px;font-size:0.82rem;flex-shrink:0">Devolver</button>
+            `;
+
+            div.querySelector('.btn-devolver-directo').addEventListener('click', async () => {
+              await processDevolucion(loan.libro_id, userId);
+              await fetchAndRenderAll();
+              await openUserModal(userId);
+            });
+
+            loansListEl.appendChild(div);
+          });
+        }
+
+        overlay.classList.add('active');
+      }
+
+      function closeModals() {
+        document.getElementById('book-modal-overlay').classList.remove('active');
+        document.getElementById('user-modal-overlay').classList.remove('active');
         currentBookId = null;
+        currentUserId = null;
+      }
+
+      async function processDevolucion(libroId, usuarioId = null) {
+        if (!SUPA) return { success: false, message: 'Supabase no inicializado' };
+
+        // 1. Intentar RPC en Supabase
+        const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_devolver_libro', {
+          p_libro_id: parseInt(libroId, 10),
+          p_usuario_id: usuarioId ? parseInt(usuarioId, 10) : null
+        });
+
+        if (!rpcErr && rpcRes) {
+          return rpcRes;
+        }
+
+        // 2. Fallback directo sin RPC
+        try {
+          let query = SUPA.from('prestamos').select('*').eq('libro_id', libroId).is('fecha_devolucion', null);
+          if (usuarioId) query = query.eq('usuario_id', usuarioId);
+          let { data: prestamos } = await query.order('id', { ascending: false }).limit(1);
+
+          if ((!prestamos || !prestamos.length) && usuarioId) {
+            const fallbackQuery = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
+            prestamos = fallbackQuery.data;
+          }
+
+          if (prestamos && prestamos.length) {
+            await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0, 10) }).eq('id', prestamos[0].id);
+          }
+
+          await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
+          return { success: true, message: 'Devolución procesada correctamente.' };
+        } catch (err) {
+          return { success: false, message: 'Error al procesar devolución: ' + err.message };
+        }
       }
 
       async function handleModalPrestar() {
@@ -765,7 +905,6 @@
           return;
         }
 
-        // Intentar RPC en Supabase
         const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_prestar_libro', {
           p_usuario_id: parseInt(userId, 10),
           p_libro_id: parseInt(currentBookId, 10)
@@ -793,29 +932,11 @@
         const userSelect = document.getElementById('modal-user-select');
         const userId = userSelect.value;
 
-        // Intentar RPC en Supabase
-        const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_devolver_libro', {
-          p_libro_id: parseInt(currentBookId, 10),
-          p_usuario_id: userId ? parseInt(userId, 10) : null
-        });
-
-        if (!rpcErr && rpcRes) {
-          if (rpcRes.success) {
-            showModalStatus(`✓ ${rpcRes.message}`, 'success');
-          } else {
-            showModalStatus(`⚠️ ${rpcRes.message}`, 'warning');
-          }
+        const result = await processDevolucion(currentBookId, userId);
+        if (result.success) {
+          showModalStatus(`✓ ${result.message}`, 'success');
         } else {
-          // Fallback directo
-          let query = SUPA.from('prestamos').select('*').eq('libro_id', currentBookId).is('fecha_devolucion', null);
-          if (userId) query = query.eq('usuario_id', userId);
-          const { data: prestamos } = await query.order('id', { ascending: false }).limit(1);
-
-          if (prestamos && prestamos.length) {
-            await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', prestamos[0].id);
-          }
-          await SUPA.from('libros').update({ disponible: true }).eq('id', currentBookId);
-          showModalStatus('✓ Devolución procesada correctamente.', 'success');
+          showModalStatus(`⚠️ ${result.message}`, 'warning');
         }
 
         await fetchAndRenderAll();
@@ -824,11 +945,6 @@
 
       // Listeners
       function attachHandlers() {
-        document.getElementById('btn-ver-usuarios').addEventListener('click', () => {
-          const list = document.getElementById('usuario-list');
-          list.style.display = list.style.display === 'grid' || list.style.display === 'block' ? 'none' : 'grid';
-        });
-
         document.getElementById('book-search-btn').addEventListener('click', async () => {
           fetchLibros.searchTerm = document.getElementById('book-search').value.trim();
           fetchLibros.category = document.getElementById('book-category-filter')?.value || '';
@@ -849,13 +965,18 @@
           await fetchLibros();
         });
 
-        // Modal listeners
-        document.getElementById('modal-close-btn').addEventListener('click', closeModal);
-        document.getElementById('book-modal-overlay').addEventListener('click', (e) => {
-          if (e.target.id === 'book-modal-overlay') closeModal();
+        // Close Modals
+        document.getElementById('modal-book-close-btn').addEventListener('click', closeModals);
+        document.getElementById('modal-user-close-btn').addEventListener('click', closeModals);
+
+        ['book-modal-overlay', 'user-modal-overlay'].forEach(id => {
+          document.getElementById(id)?.addEventListener('click', (e) => {
+            if (e.target.id === id) closeModals();
+          });
         });
+
         document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') closeModal();
+          if (e.key === 'Escape') closeModals();
         });
 
         document.getElementById('modal-btn-prestar').addEventListener('click', handleModalPrestar);
