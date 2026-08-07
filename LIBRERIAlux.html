@@ -630,7 +630,7 @@
         }
 
         const userIds = users.map(u => u.id);
-        const { data: loansData } = await SUPA.from('prestamos').select('*').in('usuario_id', userIds).is('fecha_devolucion', null);
+        const { data: loansData } = await SUPA.from('prestamos').select('*').in('usuario_id', userIds).or('fecha_devolucion.is.null,fecha_devolucion.eq.');
 
         const loansByUser = new Map();
         (loansData || []).forEach(loan => {
@@ -747,7 +747,7 @@
         document.getElementById('modal-book-keywords').textContent = keywords;
 
         // Cargar préstamos activos
-        const { data: loans } = await SUPA.from('prestamos').select('*, usuarios(nombre)').eq('libro_id', bookId).is('fecha_devolucion', null);
+        const { data: loans } = await SUPA.from('prestamos').select('*, usuarios(nombre)').eq('libro_id', bookId).or('fecha_devolucion.is.null,fecha_devolucion.eq.');
         const activeLoans = loans || [];
         document.getElementById('modal-book-loans-count').textContent = activeLoans.length;
 
@@ -803,7 +803,7 @@
         document.getElementById('modal-user-type').textContent = `Tipo: ${user.tipo}`;
         document.getElementById('modal-user-id').textContent = user.id;
 
-        const { data: loans } = await SUPA.from('prestamos').select('*').eq('usuario_id', userId).is('fecha_devolucion', null);
+        const { data: loans } = await SUPA.from('prestamos').select('*').eq('usuario_id', userId).or('fecha_devolucion.is.null,fecha_devolucion.eq.');
         const activeLoans = loans || [];
         document.getElementById('modal-user-loans-count').textContent = activeLoans.length;
 
@@ -864,35 +864,49 @@
       async function processDevolucion(libroId, usuarioId = null) {
         if (!SUPA) return { success: false, message: 'Supabase no inicializado' };
 
-        // 1. Intentar RPC en Supabase
-        const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_devolver_libro', {
-          p_libro_id: parseInt(libroId, 10),
-          p_usuario_id: usuarioId ? parseInt(usuarioId, 10) : null
-        });
-
-        if (!rpcErr && rpcRes) {
-          return rpcRes;
-        }
-
-        // 2. Fallback directo sin RPC
+        // Obtener TODOS los préstamos del libro y filtrar client-side
+        // (evita el problema de .is(null) cuando la DB guarda cadena vacía '')
         try {
-          let query = SUPA.from('prestamos').select('*').eq('libro_id', libroId).is('fecha_devolucion', null);
-          if (usuarioId) query = query.eq('usuario_id', usuarioId);
-          let { data: prestamos } = await query.order('id', { ascending: false }).limit(1);
+          const { data: todosLosPrestamos, error: qErr } = await SUPA
+            .from('prestamos')
+            .select('*')
+            .eq('libro_id', libroId)
+            .order('id', { ascending: false });
 
-          if ((!prestamos || !prestamos.length) && usuarioId) {
-            const fallbackQuery = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
-            prestamos = fallbackQuery.data;
+          if (qErr) throw qErr;
+
+          // Préstamo activo = fecha_devolucion es null, vacío o no existe
+          const activos = (todosLosPrestamos || []).filter(p => !p.fecha_devolucion);
+
+          // Si hay usuario especificado intentar encontrar el suyo primero
+          let prestamo = null;
+          if (usuarioId && activos.length) {
+            prestamo = activos.find(p => String(p.usuario_id) === String(usuarioId)) || activos[0];
+          } else if (activos.length) {
+            prestamo = activos[0];
           }
 
-          if (prestamos && prestamos.length) {
-            await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0, 10) }).eq('id', prestamos[0].id);
+          if (prestamo) {
+            const hoy = new Date().toISOString().slice(0, 10);
+            const { error: updErr } = await SUPA
+              .from('prestamos')
+              .update({ fecha_devolucion: hoy })
+              .eq('id', prestamo.id);
+            if (updErr) throw updErr;
           }
 
-          await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
-          return { success: true, message: 'Devolución procesada correctamente.' };
+          // Marcar libro disponible siempre
+          const { error: libErr } = await SUPA
+            .from('libros')
+            .update({ disponible: true })
+            .eq('id', libroId);
+          if (libErr) throw libErr;
+
+          return { success: true, message: prestamo
+            ? `Devolución registrada correctamente (préstamo #${prestamo.id}).`
+            : 'Libro marcado como disponible. No había préstamo activo registrado.' };
         } catch (err) {
-          return { success: false, message: 'Error al procesar devolución: ' + err.message };
+          return { success: false, message: 'Error al procesar devolución: ' + (err.message || JSON.stringify(err)) };
         }
       }
 
