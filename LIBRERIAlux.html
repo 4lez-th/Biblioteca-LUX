@@ -254,6 +254,42 @@
       color: #ffffff;
     }
 
+    .detail-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+    }
+
+    .detail-box h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      color: #ffffff;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      font-size: 0.92rem;
+      color: #dbe5f0;
+    }
+
+    .detail-item {
+      padding: 10px;
+      background: rgba(6, 11, 18, 0.58);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .detail-item strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #ffffff;
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -333,8 +369,11 @@
 
       <section class="card">
         <h2>Libros</h2>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
-          <input id="book-search" placeholder="Buscar por título, autor o palabra clave" style="flex:1;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)" />
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+          <input id="book-search" placeholder="Buscar por título, autor o palabra clave" style="flex:1;min-width:240px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)" />
+          <select id="book-category-filter" style="min-width:180px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+            <option value="">Todas las categorías</option>
+          </select>
           <button class="btn" id="book-search-btn">Buscar</button>
           <button class="btn" id="book-clear-btn">Limpiar</button>
         </div>
@@ -360,27 +399,14 @@
         </div>
       </section>
 
-      <section class="card">
-        <h2>Categorías</h2>
-        <div class="option-list" id="categoria-list">
-          <div class="option" data-value="Programación" data-group="categoria">
-            <input type="checkbox" name="categoria" value="Programación" id="cat-programacion" />
-            <label for="cat-programacion">Programación</label>
-          </div>
-          <div class="option" data-value="Informática" data-group="categoria">
-            <input type="checkbox" name="categoria" value="Informática" id="cat-informatica" />
-            <label for="cat-informatica">Informática</label>
-          </div>
-        </div>
-      </section>
-
       <section class="card summary">
         <h2>Resumen de selección</h2>
         <p id="resumen-usuario">Usuario: <strong>No seleccionado</strong></p>
         <p id="resumen-libro">Libro: <strong>No seleccionado</strong></p>
         <p id="resumen-accion">Acción: <strong>No seleccionada</strong></p>
-        <p id="resumen-categoria">Categorías: <strong>Ninguna</strong></p>
-        <div id="action-status" style="display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--text);font-size:0.92rem;line-height:1.5;" aria-live="polite"></div>
+        <p id="resumen-categoria">Filtro de categoría: <strong>Todas</strong></p>
+        <div id="book-detail-box" class="detail-box" style="display:none"></div>
+        <div id="action-status" style="display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--text);font-size:0.92rem;line-height:1.5;white-space:pre-line;" aria-live="polite"></div>
         <button class="btn" id="btn-accion">Ejecutar acción</button>
         <p class="note">Este prototipo usa las opciones definidas en la base de datos de ejemplo del sistema.</p>
       </section>
@@ -397,7 +423,7 @@
 
       let SUPA = null; // cliente supabase
 
-      const state = { usuario: null, libro: null, accion: null, categorias: [], busy: false };
+      const state = { usuario: null, usuarioId: null, libro: null, libroId: null, accion: null, categorias: [], busy: false };
 
       function showStatus(message, type = 'info') {
         const el = document.getElementById('action-status');
@@ -429,22 +455,40 @@
         });
       }
 
-      // Panel admin simple para insertar nuevas filas
-      function showAdminPanel() {
+      function createAdminPanel() {
+        const adminBtn = document.createElement('button');
+        adminBtn.className = 'btn';
+        adminBtn.textContent = 'Admin';
+        adminBtn.style.position = 'fixed';
+        adminBtn.style.top = '16px';
+        adminBtn.style.right = '16px';
+        adminBtn.style.zIndex = '9999';
+        adminBtn.style.minWidth = '84px';
+        adminBtn.style.padding = '8px 12px';
+        adminBtn.style.borderRadius = '12px';
+        adminBtn.onclick = () => showAdminPanel();
+        document.body.appendChild(adminBtn);
+      }
+
+      async function showAdminPanel() {
         let panel = document.getElementById('admin-panel');
-        if (panel) return panel.style.display = 'block';
+        if (panel) {
+          panel.style.display = 'block';
+          await populateLoanBookSelect();
+          return;
+        }
         panel = document.createElement('aside');
         panel.id = 'admin-panel';
-        Object.assign(panel.style, { position: 'fixed', right: '18px', bottom: '18px', width: '360px', maxHeight: '80vh', overflow: 'auto', background: 'var(--surface)', padding: '16px', borderRadius: '12px', zIndex: 9999, boxShadow: '0 12px 40px rgba(2,6,23,0.6)' });
+        Object.assign(panel.style, { position: 'fixed', top: '56px', right: '16px', width: '320px', maxHeight: 'calc(100vh - 72px)', overflow: 'auto', background: 'var(--surface)', padding: '14px', borderRadius: '14px', zIndex: 9999, boxShadow: '0 12px 40px rgba(2,6,23,0.6)', border: '1px solid rgba(255,255,255,0.12)' });
         panel.innerHTML = `
-          <h3 style="margin:0 0 8px;color:#fff">Panel Admin</h3>
-          <p style="color:var(--muted);margin:0 0 12px">Agregar usuarios, libros y categorías al proyecto Supabase. También puedes generar libros de ejemplo y procesar préstamos por ID.</p>
+          <h3 style="margin:0 0 8px;color:#fff;font-size:1rem">Panel Admin</h3>
+          <p style="color:var(--muted);margin:0 0 12px;font-size:0.88rem">Agregar usuarios, libros y categorías directamente a Supabase.</p>
           <div style="display:grid;gap:8px">
             <div>
-              <strong style="color:#fff">Usuario (registro con QR)</strong>
+              <strong style="color:#fff">Usuario</strong>
               <input id="adm-user-nombre" placeholder="Nombre" style="width:100%;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <input id="adm-user-tipo" placeholder="Tipo (estudiante/docente)" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
-              <button id="adm-user-save" class="btn" style="margin-top:8px">Agregar Usuario y generar QR</button>
+              <button id="adm-user-save" class="btn" style="margin-top:8px">Agregar Usuario</button>
               <div id="adm-user-qr" style="margin-top:8px"></div>
             </div>
             <hr/>
@@ -453,9 +497,7 @@
               <input id="adm-lib-titulo" placeholder="Título" style="width:100%;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <input id="adm-lib-autor" placeholder="Autor" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <input id="adm-lib-categoria" placeholder="Categoría" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
-              <input id="adm-lib-keywords" placeholder="Palabras clave (coma separadas)" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <button id="adm-lib-save" class="btn" style="margin-top:8px">Agregar Libro</button>
-              <button id="adm-lib-seed" class="btn" style="margin-top:8px">Generar libros de ejemplo</button>
             </div>
             <hr/>
             <div>
@@ -465,7 +507,7 @@
             </div>
             <hr/>
             <div>
-              <strong style="color:#fff">Procesar préstamo / devolución (por ID)</strong>
+              <strong style="color:#fff">Préstamo rápido</strong>
               <select id="adm-loan-lib-select" style="width:100%;padding:8px;border-radius:6px;background:transparent;color:var(--text);margin-top:6px"></select>
               <input id="adm-loan-userid" placeholder="ID usuario (numérico)" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:transparent;color:var(--text)" />
               <div style="display:flex;gap:8px;margin-top:8px">
@@ -477,47 +519,69 @@
           </div>`;
 
         document.body.appendChild(panel);
+        await populateLoanBookSelect();
 
         panel.querySelector('#adm-close').onclick = () => panel.style.display = 'none';
 
         panel.querySelector('#adm-user-save').onclick = async () => {
           const nombre = panel.querySelector('#adm-user-nombre').value.trim();
           const tipo = panel.querySelector('#adm-user-tipo').value.trim();
-          if (!nombre || !tipo) { alert('Rellena nombre y tipo'); return; }
+          if (!nombre || !tipo) {
+            showStatus('Rellena nombre y tipo del usuario.', 'warning');
+            return;
+          }
           const res = await insertRow('usuarios', { nombre, tipo });
           const created = res && res.data && res.data[0] ? res.data[0] : (res.data ? res.data : null);
           panel.querySelector('#adm-user-nombre').value = '';
           panel.querySelector('#adm-user-tipo').value = '';
           await fetchAndRenderAll();
+          if (res && res.error) {
+            showStatus('No se pudo guardar el usuario en Supabase.', 'error');
+            return;
+          }
           if (created && created.id) {
             const qrUrl = generateQrUrl(`user:${created.id}|name:${created.nombre}`);
             const qrWrap = panel.querySelector('#adm-user-qr');
             qrWrap.innerHTML = `<img src="${qrUrl}" alt="QR" style="width:120px;height:120px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)" /><div style="color:var(--muted);font-size:0.9rem;margin-top:6px">ID: ${created.id}</div>`;
           }
-          alert('Usuario agregado');
+          showStatus('Usuario agregado y enviado a Supabase.', 'success');
         };
 
         panel.querySelector('#adm-lib-save').onclick = async () => {
           const titulo = panel.querySelector('#adm-lib-titulo').value.trim();
           const autor = panel.querySelector('#adm-lib-autor').value.trim();
           const categoria = panel.querySelector('#adm-lib-categoria').value.trim();
-          if (!titulo) { alert('Título requerido'); return; }
+          if (!titulo) {
+            showStatus('El título del libro es obligatorio.', 'warning');
+            return;
+          }
           const payload = { titulo, autor, categoria, disponible: true };
-          await insertRow('libros', payload);
+          const res = await insertRow('libros', payload);
           panel.querySelector('#adm-lib-titulo').value = '';
           panel.querySelector('#adm-lib-autor').value = '';
           panel.querySelector('#adm-lib-categoria').value = '';
           await fetchAndRenderAll();
-          alert('Libro agregado');
+          if (res && res.error) {
+            showStatus('No se pudo guardar el libro en Supabase.', 'error');
+            return;
+          }
+          showStatus('Libro agregado y enviado a Supabase.', 'success');
         };
 
         panel.querySelector('#adm-cat-save').onclick = async () => {
           const nombre = panel.querySelector('#adm-cat-nombre').value.trim();
-          if (!nombre) { alert('Nombre requerido'); return; }
-          await insertRow('categorias', { nombre });
+          if (!nombre) {
+            showStatus('La categoría necesita un nombre.', 'warning');
+            return;
+          }
+          const res = await insertRow('categorias', { nombre });
           panel.querySelector('#adm-cat-nombre').value = '';
           await fetchAndRenderAll();
-          alert('Categoría agregada');
+          if (res && res.error) {
+            showStatus('No se pudo guardar la categoría en Supabase.', 'error');
+            return;
+          }
+          showStatus('Categoría agregada y enviada a Supabase.', 'success');
         };
       }
 
@@ -535,10 +599,10 @@
 
       async function insertRow(table, payload) {
         if (!SUPA) {
-          showStatus('Configura Supabase antes de agregar registros.', 'warning');
-          return;
+          showStatus('Falta conexión con Supabase para escribir.', 'warning');
+          return { data: null, error: new Error('SUPA not available') };
         }
-        const { data, error } = await SUPA.from(table).insert([payload]);
+        const { data, error } = await SUPA.from(table).insert([payload]).select();
         if (error) {
           console.error(error);
           showStatus(`No se pudo guardar en ${table}.`, 'error');
@@ -552,20 +616,22 @@
         const div = document.createElement('div');
         div.className = 'option';
         div.dataset.group = group;
-        div.dataset.id = item.id || item.id_libro || item.id_usuario || item.id || '';
+        div.dataset.id = item.id || item.id_libro || item.id_usuario || '';
         div.dataset.value = labelText;
-        const input = document.createElement(item.tipoInput || 'input');
+
+        const input = document.createElement('input');
         input.type = item.inputType || (group === 'categoria' ? 'checkbox' : 'radio');
         input.name = group;
         input.value = labelText;
         const id = `${group}-${Math.random().toString(36).slice(2,8)}`;
         input.id = id;
+
         const label = document.createElement('label');
         label.htmlFor = id;
         label.textContent = labelText;
+
         div.appendChild(input);
         div.appendChild(label);
-        div.addEventListener('click', () => toggleSelected(div));
         return div;
       }
 
@@ -579,30 +645,104 @@
         await fetchCategorias();
       }
 
+      function getLoanLimitDays(loan) {
+        return Number(loan?.dias_limite || 7);
+      }
+
+      function getLoanDueDate(loan) {
+        const date = new Date(loan.fecha_prestamo || new Date().toISOString().slice(0, 10));
+        date.setDate(date.getDate() + getLoanLimitDays(loan));
+        return date.toISOString().slice(0, 10);
+      }
+
+      function isLoanLate(loan) {
+        if (loan.fecha_devolucion) return false;
+        const due = new Date(getLoanDueDate(loan) + 'T23:59:59');
+        return new Date() > due;
+      }
+
       async function fetchUsuarios() {
         const countEl = document.getElementById('usuarios-count');
         const list = document.getElementById('usuario-list');
         if (!countEl) return;
-        const { data, error } = await SUPA.from('usuarios').select('*').order('id', { ascending: true });
-        if (error) {
-          console.error(error);
+        const { data: users, error: usersError } = await SUPA.from('usuarios').select('*').order('id', { ascending: true });
+        if (usersError) {
+          console.error(usersError);
           countEl.textContent = '0';
           showStatus('No se pudieron cargar los usuarios.', 'error');
           return;
         }
-        countEl.textContent = data.length || 0;
+        countEl.textContent = users.length || 0;
         if (!list) return;
         list.innerHTML = '';
-        if (!data.length) {
+        if (!users.length) {
           list.innerHTML = '<div class="option" style="opacity:0.8"><label>No hay usuarios registrados.</label></div>';
           return;
         }
-        data.forEach(u => {
-          const text = `${u.nombre} (${u.tipo})`;
-          const opt = makeOption({ id: u.id }, 'usuario', text);
-          opt.dataset.usuarioId = u.id;
-          list.appendChild(opt);
+
+        const userIds = users.map(u => u.id);
+        const { data: loansData, error: loansError } = await SUPA.from('prestamos').select('*').in('usuario_id', userIds).is('fecha_devolucion', null).order('id', { ascending: true });
+        if (loansError) {
+          console.error(loansError);
+          showStatus('No se pudieron cargar los préstamos activos.', 'error');
+        }
+
+        const loansByUser = new Map();
+        (loansData || []).forEach(loan => {
+          const arr = loansByUser.get(loan.usuario_id) || [];
+          arr.push(loan);
+          loansByUser.set(loan.usuario_id, arr);
         });
+
+        const libroIds = [...new Set((loansData || []).map(loan => loan.libro_id).filter(Boolean))];
+        const bookMap = new Map();
+        if (libroIds.length) {
+          const { data: booksData } = await SUPA.from('libros').select('*').in('id', libroIds);
+          (booksData || []).forEach(book => bookMap.set(book.id, book));
+        }
+
+        users.forEach(u => {
+          const loans = loansByUser.get(u.id) || [];
+          const cards = loans.length
+            ? loans.map(loan => {
+                const book = bookMap.get(loan.libro_id);
+                const dueDate = getLoanDueDate(loan);
+                const late = isLoanLate(loan);
+                return `
+                  <div style="padding:6px 0;border-top:1px solid rgba(255,255,255,0.08);font-size:0.88rem">
+                    <div><strong>${book?.titulo || 'Libro sin título'}</strong></div>
+                    <div style="color:var(--muted);font-size:0.82rem">Prestado: ${loan.fecha_prestamo || '—'} · Límite: ${dueDate}</div>
+                    <div style="margin-top:2px;color:${late ? '#ffb4b4' : '#c7f2c6'};font-size:0.82rem;font-weight:600">${late ? 'A destiempo' : 'En tiempo'}</div>
+                  </div>`;
+              }).join('')
+            : '<div style="padding:4px 0;color:var(--muted);font-size:0.85rem">Sin préstamos activos</div>';
+
+          const card = document.createElement('div');
+          card.className = 'option';
+          card.dataset.group = 'usuario';
+          card.dataset.id = u.id;
+          card.dataset.value = u.nombre;
+          card.style.display = 'block';
+          card.style.padding = '12px';
+
+          const uid = `usr-${u.id}`;
+          card.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              <input type="radio" name="usuario" id="${uid}" value="${u.nombre}" style="cursor:pointer" />
+              <label for="${uid}" style="font-weight:700;cursor:pointer;flex:1">${u.nombre} <span style="color:var(--muted);font-weight:400">(${u.tipo})</span></label>
+            </div>
+            <div style="color:var(--muted);font-size:0.86rem;margin-bottom:4px;padding-left:28px">Préstamos activos: ${loans.length}</div>
+            <div style="padding-left:28px">${cards}</div>
+          `;
+          list.appendChild(card);
+        });
+      }
+
+      function isSampleBookRecord(book) {
+        const title = String(book?.titulo || '').toLowerCase();
+        const author = String(book?.autor || '').toLowerCase();
+        const category = String(book?.categoria || '').toLowerCase();
+        return title.startsWith('libro_sample_') || title.startsWith('libroprestamo_sample_');
       }
 
       async function fetchLibros() {
@@ -610,25 +750,20 @@
         const list = document.getElementById('libro-list');
         const countEl = document.getElementById('libros-count');
         if (!list) return;
+
+        const categoryFilter = fetchLibros.category || document.getElementById('book-category-filter')?.value || '';
+        const searchTerm = fetchLibros.searchTerm || '';
+
         let query = SUPA.from('libros').select('*').order('id', { ascending: true });
-        if (fetchLibros.searchTerm) {
-          const t = fetchLibros.searchTerm;
-          query = SUPA.from('libros').select('*').or(`titulo.ilike.%${t}%,autor.ilike.%${t}%,categoria.ilike.%${t}%`);
-          try {
-            const { data: kdata } = await SUPA.from('libros').select('*').contains('palabras_clave', [t]);
-            if (kdata && kdata.length) {
-              kdata.forEach(k => {
-                if (!list.querySelector(`[data-id='${k.id}']`)) {
-                  const textk = `${k.titulo}${k.autor ? ' - ' + k.autor : ''}${k.disponible === false ? ' (Prestado)' : ''}`;
-                  const optk = makeOption({ id: k.id }, 'libro', textk);
-                  optk.dataset.libroId = k.id;
-                  optk.dataset.disponible = k.disponible === true || k.disponible === null ? 'true' : 'false';
-                  list.appendChild(optk);
-                }
-              });
-            }
-          } catch (e) { /* ignore */ }
+
+        if (categoryFilter) {
+          query = query.eq('categoria', categoryFilter);
         }
+
+        if (searchTerm) {
+          query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,categoria.ilike.%${searchTerm}%`);
+        }
+
         const { data, error } = await query;
         if (error) {
           console.error(error);
@@ -636,12 +771,33 @@
           showStatus('No se pudieron cargar los libros.', 'error');
           return;
         }
-        if (!data.length) {
+
+        let realData = (data || []).filter(book => !isSampleBookRecord(book));
+
+        if (searchTerm) {
+          try {
+            let kQuery = SUPA.from('libros').select('*').contains('palabras_clave', [searchTerm]);
+            if (categoryFilter) kQuery = kQuery.eq('categoria', categoryFilter);
+            const { data: kdata } = await kQuery;
+            if (kdata && kdata.length) {
+              const existingIds = new Set(realData.map(b => b.id));
+              kdata.forEach(k => {
+                if (!isSampleBookRecord(k) && !existingIds.has(k.id)) {
+                  realData.push(k);
+                  existingIds.add(k.id);
+                }
+              });
+            }
+          } catch (e) { /* ignore */ }
+        }
+
+        if (!realData.length) {
           list.innerHTML = '<div class="option" style="opacity:0.8"><label>No hay libros disponibles.</label></div>';
           if (countEl) countEl.textContent = '0';
           return;
         }
-        data.forEach(l => {
+
+        realData.forEach(l => {
           const text = `${l.titulo}${l.autor ? ' - ' + l.autor : ''}${l.disponible === false ? ' (Prestado)' : ''}`;
           const opt = makeOption({ id: l.id }, 'libro', text);
           opt.dataset.id = l.id;
@@ -649,58 +805,112 @@
           opt.dataset.disponible = l.disponible === true || l.disponible === null ? 'true' : 'false';
           list.appendChild(opt);
         });
-        if (countEl) countEl.textContent = list.children.length;
+
+        if (countEl) countEl.textContent = realData.length;
+      }
+
+      function isSampleCategoryRecord(category) {
+        const name = String(category?.nombre || '').toLowerCase();
+        return name.includes('cat_sample_');
       }
 
       async function fetchCategorias() {
-        clearList('categoria-list');
-        const list = document.getElementById('categoria-list');
-        if (!list) return;
+        const categorySelect = document.getElementById('book-category-filter');
         const { data, error } = await SUPA.from('categorias').select('*').order('id', { ascending: true });
         if (error) { console.error(error); return; }
-        data.forEach(c => {
-          const opt = makeOption({ id: c.id }, 'categoria', c.nombre);
-          list.appendChild(opt);
-        });
+
+        if (categorySelect) {
+          const currentValue = categorySelect.value;
+          categorySelect.innerHTML = '<option value="">Todas las categorías</option>';
+          (data || []).filter(category => !isSampleCategoryRecord(category)).forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.nombre;
+            opt.textContent = c.nombre;
+            categorySelect.appendChild(opt);
+          });
+          if (currentValue) categorySelect.value = currentValue;
+        }
       }
 
       function actualizarResumen() {
         document.getElementById('resumen-usuario').innerHTML = `Usuario: <strong>${state.usuario || 'No seleccionado'}</strong>`;
         document.getElementById('resumen-libro').innerHTML = `Libro: <strong>${state.libro || 'No seleccionado'}</strong>`;
         document.getElementById('resumen-accion').innerHTML = `Acción: <strong>${state.accion || 'No seleccionada'}</strong>`;
-        const categoriasTexto = state.categorias.length ? state.categorias.join(', ') : 'Ninguna';
+        const categoryFilterVal = document.getElementById('book-category-filter')?.value;
+        const categoriasTexto = state.categorias.length 
+          ? state.categorias.join(', ') 
+          : (categoryFilterVal ? categoryFilterVal : 'Todas');
         document.getElementById('resumen-categoria').innerHTML = `Categorías: <strong>${categoriasTexto}</strong>`;
+      }
+
+      async function renderBookDetail(bookId) {
+        const box = document.getElementById('book-detail-box');
+        if (!box) return;
+        if (!bookId || !SUPA) {
+          box.style.display = 'none';
+          return;
+        }
+        const { data: book, error } = await SUPA.from('libros').select('*').eq('id', bookId).single();
+        if (error || !book) {
+          box.style.display = 'none';
+          return;
+        }
+        const { data: loansData } = await SUPA.from('prestamos').select('*').eq('libro_id', bookId).is('fecha_devolucion', null);
+        const activeLoans = loansData || [];
+        const inventoryState = book.disponible !== false && activeLoans.length === 0 ? 'Disponible' : 'Prestado';
+        const keywords = Array.isArray(book.palabras_clave) ? book.palabras_clave.join(', ') : (book.palabras_clave || '—');
+        box.innerHTML = `
+          <h3>Detalle del libro</h3>
+          <div class="detail-grid">
+            <div class="detail-item"><strong>Título</strong>${book.titulo || '—'}</div>
+            <div class="detail-item"><strong>Autor</strong>${book.autor || '—'}</div>
+            <div class="detail-item"><strong>Categoría</strong>${book.categoria || '—'}</div>
+            <div class="detail-item"><strong>Editorial</strong>${book.editorial || '—'}</div>
+            <div class="detail-item"><strong>Inventario</strong>${inventoryState}</div>
+            <div class="detail-item"><strong>Préstamos activos</strong>${activeLoans.length}</div>
+            <div class="detail-item" style="grid-column:1/-1;"><strong>Palabras clave</strong>${keywords}</div>
+            <div class="detail-item" style="grid-column:1/-1;"><strong>Resumen</strong>Usuario: ${state.usuario || 'No seleccionado'} · Acción: ${state.accion || 'No seleccionada'} · Categorías: ${state.categorias.length ? state.categorias.join(', ') : 'Ninguna'}</div>
+          </div>`;
+        box.style.display = 'block';
       }
 
       function toggleSelected(element) {
         const group = element.dataset.group;
         if (!group) return;
-        const input = element.querySelector('input');
-        if (!input) return;
 
-        if (input.type === 'radio') {
+        const input = element.querySelector('input');
+
+        if (group === 'usuario' || group === 'libro' || group === 'accion') {
           const siblings = document.querySelectorAll(`.option[data-group="${group}"]`);
-          siblings.forEach(item => item.classList.remove('selected'));
+          siblings.forEach(item => {
+            item.classList.remove('selected');
+            const itemInput = item.querySelector('input');
+            if (itemInput) itemInput.checked = false;
+          });
           element.classList.add('selected');
-          input.checked = true;
-          state[group] = element.dataset.value || input.value;
-          if (group === 'libro') state.libroId = element.dataset.libroid || element.dataset.id || element.dataset.libroId;
-        } else if (input.type === 'checkbox') {
-          input.checked = !input.checked;
-          element.classList.toggle('selected', input.checked);
-          const value = element.dataset.value || input.value;
-          if (input.checked) {
+          if (input) input.checked = true;
+
+          state[group] = element.dataset.value || (input ? input.value : '');
+          if (group === 'usuario') {
+            state.usuarioId = element.dataset.id || null;
+          } else if (group === 'libro') {
+            state.libroId = element.dataset.id || element.dataset.libroId || element.dataset.libroid || null;
+          }
+        } else if (group === 'categoria') {
+          const isSelected = element.classList.toggle('selected');
+          if (input) input.checked = isSelected;
+          const value = element.dataset.value || (input ? input.value : '');
+          if (isSelected) {
             if (!state.categorias.includes(value)) state.categorias.push(value);
           } else {
             state.categorias = state.categorias.filter(item => item !== value);
           }
         }
         actualizarResumen();
+        if (group === 'libro' && state.libroId) {
+          renderBookDetail(state.libroId);
+        }
       }
-
-      document.addEventListener('click', (e) => {
-        // delegation - options are created dynamically too
-      });
 
       async function handleAccion() {
         if (state.busy) return;
@@ -709,6 +919,7 @@
           return;
         }
         const usuario = state.usuario;
+        const usuarioId = state.usuarioId;
         const accion = state.accion;
         const libroId = state.libroId;
 
@@ -724,52 +935,111 @@
               showStatus('Selecciona un libro para prestar.', 'warning');
               return;
             }
-            const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
-            if (libro && libro.disponible === false) {
-              showStatus('El libro seleccionado no está disponible.', 'warning');
+
+            let finalUserId = usuarioId;
+            if (!finalUserId) {
+              const uRow = await findUsuarioByName(usuario);
+              finalUserId = uRow ? uRow.id : null;
+            }
+
+            if (!finalUserId) {
+              showStatus('Usuario no encontrado en la base de datos.', 'error');
               return;
             }
-            const usuarioRow = await findUsuarioByName(usuario);
-            if (!usuarioRow) {
-              showStatus('Usuario no encontrado en la base.', 'error');
-              return;
+
+            // 1. Intentar RPC atómico en Supabase
+            const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_prestar_libro', {
+              p_usuario_id: parseInt(finalUserId, 10),
+              p_libro_id: parseInt(libroId, 10)
+            });
+
+            if (!rpcErr && rpcRes) {
+              if (rpcRes.success) {
+                showStatus(`✓ ${rpcRes.message} (Libro: ${rpcRes.libro_titulo})`, 'success');
+              } else {
+                showStatus(`⚠️ ${rpcRes.message}`, 'warning');
+              }
+            } else {
+              // Fallback directo
+              const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
+              if (libro && libro.disponible === false) {
+                showStatus('El libro seleccionado no está disponible.', 'warning');
+                return;
+              }
+              await SUPA.from('prestamos').insert([{ usuario_id: finalUserId, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
+              await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
+              showStatus('Préstamo registrado correctamente.', 'success');
             }
-            await SUPA.from('prestamos').insert([{ usuario_id: usuarioRow.id, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
-            await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
-            showStatus('Préstamo registrado correctamente.', 'success');
-            await fetchLibros();
+
+            await fetchAndRenderAll();
+
           } else if (accion === 'Devolver') {
             if (!libroId) {
               showStatus('Selecciona un libro para devolver.', 'warning');
               return;
             }
-            const usuarioRow = await findUsuarioByName(usuario);
-            if (!usuarioRow) {
-              showStatus('Usuario no encontrado.', 'error');
-              return;
+
+            let finalUserId = usuarioId;
+            if (!finalUserId) {
+              const uRow = await findUsuarioByName(usuario);
+              finalUserId = uRow ? uRow.id : null;
             }
-            const { data: prestamos } = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).eq('usuario_id', usuarioRow.id).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
-            if (prestamos && prestamos.length) {
-              const pid = prestamos[0].id;
-              await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
+
+            // 1. Intentar RPC atómico en Supabase
+            const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_devolver_libro', {
+              p_libro_id: parseInt(libroId, 10),
+              p_usuario_id: finalUserId ? parseInt(finalUserId, 10) : null
+            });
+
+            if (!rpcErr && rpcRes) {
+              if (rpcRes.success) {
+                const estado = rpcRes.a_tiempo !== undefined ? (rpcRes.a_tiempo ? 'Devuelto a tiempo.' : 'Devuelto a destiempo.') : '';
+                showStatus(`✓ ${rpcRes.message} ${estado}`, 'success');
+              } else {
+                showStatus(`⚠️ ${rpcRes.message}`, 'warning');
+              }
+            } else {
+              // Fallback directo
+              let query = SUPA.from('prestamos').select('*').eq('libro_id', libroId).is('fecha_devolucion', null);
+              if (finalUserId) query = query.eq('usuario_id', finalUserId);
+              const { data: prestamos } = await query.order('id', { ascending: false }).limit(1);
+
+              if (prestamos && prestamos.length) {
+                const pid = prestamos[0].id;
+                await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
+              }
+              await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
+              showStatus('Devolución procesada correctamente.', 'success');
             }
-            await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
-            showStatus('Devolución procesada correctamente.', 'success');
-            await fetchLibros();
+
+            await fetchAndRenderAll();
+
           } else {
-            let query = SUPA.from('libros').select('*');
-            if (state.categorias.length) {
-              query = query.in('categoria', state.categorias);
+            // Consultar inventario
+            const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_consultar_inventario', {
+              p_categorias: state.categorias.length ? state.categorias : null,
+              p_busqueda: fetchLibros.searchTerm || null
+            });
+
+            let librosList = [];
+            if (!rpcErr && rpcRes) {
+              librosList = rpcRes;
+            } else {
+              let query = SUPA.from('libros').select('*');
+              if (state.categorias.length) query = query.in('categoria', state.categorias);
+              if (fetchLibros.searchTerm) {
+                const t = fetchLibros.searchTerm;
+                query = query.or(`titulo.ilike.%${t}%,autor.ilike.%${t}%,categoria.ilike.%${t}%`);
+              }
+              const { data } = await query;
+              librosList = data || [];
             }
-            const { data, error } = await query;
-            if (error) {
-              showStatus('No se pudo consultar el inventario.', 'error');
-              return;
-            }
-            const texto = data && data.length
-              ? data.map(x => `${x.titulo} - ${x.autor || ''} (${x.disponible ? 'Disponible' : 'Prestado'})`).join('\n')
-              : 'No hay resultados';
-            showStatus(texto, 'info');
+
+            const realLibros = librosList.filter(x => !isSampleBookRecord(x));
+            const texto = realLibros.length
+              ? realLibros.map(x => `• ${x.titulo}${x.autor ? ' - ' + x.autor : ''} (${x.disponible ? 'Disponible' : 'Prestado'})`).join('\n')
+              : 'No hay libros que coincidan con la consulta.';
+            showStatus(`Resultados del Inventario (${realLibros.length}):\n${texto}`, 'info');
           }
         } finally {
           setBusy(false);
@@ -789,46 +1059,46 @@
         return `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${data}`;
       }
 
-      async function seedSampleBooks() {
-        if (!SUPA) { alert('Configura Supabase primero.'); return; }
-        const samples = [
-          { titulo: 'Introducción a Python', autor: 'A. Pérez', categoria: 'Programación', palabras_clave: ['python','programación'], disponible: true },
-          { titulo: 'Estructuras de Datos en JS', autor: 'L. Gómez', categoria: 'Programación', palabras_clave: ['javascript','algoritmos'], disponible: true },
-          { titulo: 'Bases de Datos Relacionales', autor: 'E. Codd', categoria: 'Informática', palabras_clave: ['sql','bd'], disponible: true },
-          { titulo: 'Redes y Comunicaciones', autor: 'M. Ruiz', categoria: 'Informática', palabras_clave: ['redes','tcp'], disponible: true },
-          { titulo: 'Algoritmos y Complejidad', autor: 'D. Knuth', categoria: 'Programación', palabras_clave: ['algoritmos','complejidad'], disponible: true }
-        ];
-        for (const s of samples) {
-          await insertRow('libros', { ...s });
-        }
-        await fetchLibros();
-      }
-
       async function adminProcessLoan(mode) {
         if (!SUPA) { alert('Configura Supabase primero.'); return; }
         const select = document.getElementById('adm-loan-lib-select');
-        const userId = parseInt(document.getElementById('adm-loan-userid').value.trim(),10);
+        const userId = parseInt(document.getElementById('adm-loan-userid').value.trim(), 10);
         if (!select || !select.value) { alert('Selecciona un libro'); return; }
         if (!userId || isNaN(userId)) { alert('Introduce un ID de usuario válido'); return; }
-        const libroId = parseInt(select.value,10);
+        const libroId = parseInt(select.value, 10);
+
         if (mode === 'prestar') {
-          // comprobar disponibilidad
-          const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
-          if (libro && libro.disponible === false) { alert('El libro no está disponible'); return; }
-          await SUPA.from('prestamos').insert([{ usuario_id: userId, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
-          await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
-          alert('Préstamo creado');
-        } else {
-          // devolver
-          const { data: prestamos } = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).eq('usuario_id', userId).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
-          if (prestamos && prestamos.length) {
-            const pid = prestamos[0].id;
-            await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
+          const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_prestar_libro', {
+            p_usuario_id: userId,
+            p_libro_id: libroId
+          });
+          if (!rpcErr && rpcRes) {
+            alert(rpcRes.message);
+          } else {
+            const { data: libro } = await SUPA.from('libros').select('*').eq('id', libroId).single();
+            if (libro && libro.disponible === false) { alert('El libro no está disponible'); return; }
+            await SUPA.from('prestamos').insert([{ usuario_id: userId, libro_id: libroId, fecha_prestamo: new Date().toISOString().slice(0,10) }]);
+            await SUPA.from('libros').update({ disponible: false }).eq('id', libroId);
+            alert('Préstamo creado');
           }
-          await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
-          alert('Devolución procesada');
+        } else {
+          const { data: rpcRes, error: rpcErr } = await SUPA.rpc('fn_devolver_libro', {
+            p_libro_id: libroId,
+            p_usuario_id: userId
+          });
+          if (!rpcErr && rpcRes) {
+            alert(rpcRes.message);
+          } else {
+            const { data: prestamos } = await SUPA.from('prestamos').select('*').eq('libro_id', libroId).eq('usuario_id', userId).is('fecha_devolucion', null).order('id', { ascending: false }).limit(1);
+            if (prestamos && prestamos.length) {
+              const pid = prestamos[0].id;
+              await SUPA.from('prestamos').update({ fecha_devolucion: new Date().toISOString().slice(0,10) }).eq('id', pid);
+            }
+            await SUPA.from('libros').update({ disponible: true }).eq('id', libroId);
+            alert('Devolución procesada');
+          }
         }
-        await fetchLibros();
+        await fetchAndRenderAll();
         await populateLoanBookSelect();
       }
 
@@ -856,48 +1126,53 @@
         });
         document.getElementById('book-search-btn').addEventListener('click', async () => {
           const term = document.getElementById('book-search').value.trim();
+          const category = document.getElementById('book-category-filter')?.value || '';
           fetchLibros.searchTerm = term;
+          fetchLibros.category = category;
           await fetchLibros();
         });
         document.getElementById('book-clear-btn').addEventListener('click', async () => {
           document.getElementById('book-search').value = '';
+          const categorySelect = document.getElementById('book-category-filter');
+          if (categorySelect) categorySelect.value = '';
           fetchLibros.searchTerm = null;
+          fetchLibros.category = null;
           await fetchLibros();
         });
+        document.getElementById('book-category-filter')?.addEventListener('change', async (e) => {
+          fetchLibros.category = e.target.value;
+          actualizarResumen();
+          await fetchLibros();
+        });
+
         // Delegation for dynamically created options
-        ['usuario-list','libro-list','accion-list','categoria-list'].forEach(id => {
+        ['usuario-list','libro-list','accion-list'].forEach(id => {
           const el = document.getElementById(id);
           if (!el) return;
           el.addEventListener('click', (e) => {
             const option = e.target.closest('.option');
             if (option) toggleSelected(option);
-            // if option is action set state.accion accordingly
-            if (id === 'accion-list' && option) state.accion = option.dataset.value || option.textContent.trim();
           });
         });
-          // Admin panel buttons (delegated attach because panel created dynamically)
-          document.addEventListener('click', async (e) => {
-            const target = e.target;
-            if (!target) return;
-            if (target.id === 'adm-lib-seed') {
-              e.preventDefault();
-              await seedSampleBooks();
-              alert('Libros de ejemplo añadidos');
-              await fetchLibros();
-            }
-            if (target.id === 'adm-loan-prestar') {
-              e.preventDefault();
-              await adminProcessLoan('prestar');
-            }
-            if (target.id === 'adm-loan-devolver') {
-              e.preventDefault();
-              await adminProcessLoan('devolver');
-            }
-          });
+
+        // Admin panel buttons
+        document.addEventListener('click', async (e) => {
+          const target = e.target;
+          if (!target) return;
+          if (target.id === 'adm-loan-prestar') {
+            e.preventDefault();
+            await adminProcessLoan('prestar');
+          }
+          if (target.id === 'adm-loan-devolver') {
+            e.preventDefault();
+            await adminProcessLoan('devolver');
+          }
+        });
       }
 
-      // inicialización
+      // Inicialización
       await initSupabase();
+      createAdminPanel();
       attachHandlers();
       if (SUPA) {
         await fetchAndRenderAll();
