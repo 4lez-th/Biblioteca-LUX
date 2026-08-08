@@ -501,7 +501,10 @@
     <section class="panel">
       <div class="panel-header">
         <span class="panel-title">Usuarios</span>
-        <span class="stats">Total: <strong id="usuarios-count">—</strong></span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="stats">Total: <strong id="usuarios-count">—</strong></span>
+          <button class="btn btn-primary btn-sm" id="btn-add-user-modal">+ Añadir Usuario</button>
+        </div>
       </div>
       <div class="panel-body">
         <div class="list" id="usuario-list">
@@ -514,7 +517,10 @@
     <section class="panel">
       <div class="panel-header">
         <span class="panel-title">Inventario de Libros</span>
-        <span class="stats">Total: <strong id="libros-count">—</strong></span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="stats">Total: <strong id="libros-count">—</strong></span>
+          <button class="btn btn-primary btn-sm" id="btn-add-book-modal">+ Añadir Libro</button>
+        </div>
       </div>
       <div class="panel-body">
         <div class="search-row">
@@ -603,6 +609,84 @@
       <div id="m-user-loans-list">
         <div class="empty-msg">Sin préstamos activos.</div>
       </div>
+      <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:0.8rem;color:var(--muted)">Acciones de administración</span>
+        <button class="btn btn-danger btn-sm" id="btn-delete-user">Eliminar Usuario</button>
+      </div>
+      <div class="msg" id="m-user-msg" style="margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AÑADIR USUARIO -->
+<div class="overlay" id="add-user-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2>Añadir Nuevo Usuario</h2>
+        <div class="sub">Registra una nueva persona en el sistema</div>
+      </div>
+      <button class="modal-close" id="close-add-user-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row" style="margin-bottom:12px;display:block">
+        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:0.82rem">Nombre completo</label>
+        <input type="text" id="new-user-name" placeholder="Ej. Ana García López" style="width:100%" />
+      </div>
+      <div class="form-row" style="margin-bottom:16px;display:block">
+        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:0.82rem">Tipo de usuario</label>
+        <select id="new-user-type" style="width:100%">
+          <option value="Estudiante">Estudiante</option>
+          <option value="Docente">Docente</option>
+          <option value="Administrativo">Administrativo</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost" id="cancel-add-user">Cancelar</button>
+        <button class="btn btn-primary" id="btn-save-user">Guardar Usuario</button>
+      </div>
+      <div class="msg" id="add-user-msg" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AÑADIR LIBRO -->
+<div class="overlay" id="add-book-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2>Añadir Nuevo Libro</h2>
+        <div class="sub">Registra un nuevo ejemplar en el inventario</div>
+      </div>
+      <button class="modal-close" id="close-add-book-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row" style="margin-bottom:10px;display:block">
+        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:0.82rem">Título</label>
+        <input type="text" id="new-book-title" placeholder="Ej. Cien años de soledad" style="width:100%" />
+      </div>
+      <div class="form-row" style="margin-bottom:10px;display:block">
+        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:0.82rem">Autor</label>
+        <input type="text" id="new-book-author" placeholder="Ej. Gabriel García Márquez" style="width:100%" />
+      </div>
+      <div class="form-row" style="margin-bottom:10px;display:block">
+        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:0.82rem">Categoría</label>
+        <select id="new-book-cat" style="width:100%"></select>
+      </div>
+      <div class="form-row" style="margin-bottom:10px;display:block">
+        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:0.82rem">Editorial</label>
+        <input type="text" id="new-book-ed" placeholder="Ej. Editorial Sudamericana" style="width:100%" />
+      </div>
+      <div class="form-row" style="margin-bottom:16px;display:block">
+        <label style="display:block;margin-bottom:4px;font-weight:600;font-size:0.82rem">Palabras clave (separadas por comas)</label>
+        <input type="text" id="new-book-kw" placeholder="Ej. novela, clásico, literatura" style="width:100%" />
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost" id="cancel-add-book">Cancelar</button>
+        <button class="btn btn-primary" id="btn-save-book">Guardar Libro</button>
+      </div>
+      <div class="msg" id="add-book-msg" style="margin-top:10px"></div>
     </div>
   </div>
 </div>
@@ -625,7 +709,6 @@
 
   /* ===================== HELPERS ===================== */
   function isActive(loan) {
-    // Un préstamo está activo si fecha_devolucion es null, undefined o cadena vacía
     return !loan.fecha_devolucion;
   }
 
@@ -685,12 +768,10 @@
     localStorage.setItem('lux-bg', name);
   }
 
-  // Init saved theme
   applyTheme(localStorage.getItem('lux-theme') || 'indigo');
   const savedBg = localStorage.getItem('lux-bg');
   if (savedBg) applyBg(savedBg);
 
-  // Dropdown toggle
   document.getElementById('theme-toggle-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     document.getElementById('theme-dropdown').classList.toggle('open');
@@ -712,6 +793,7 @@
 
   /* ===================== STATE ===================== */
   let currentBookId = null;
+  let currentUserId = null;
   let allUsers = [];
 
   /* ===================== DATA FETCH ===================== */
@@ -727,7 +809,6 @@
     document.getElementById('usuarios-count').textContent = allUsers.length;
     document.getElementById('stat-usuarios').textContent = allUsers.length;
 
-    // Cargar préstamos activos para contar
     const { data: loans } = await db.from('prestamos').select('*');
     const activeLoansByUser = new Map();
     (loans || []).filter(isActive).forEach(l => {
@@ -772,9 +853,16 @@
     const { data, error } = await q;
     if (error) { list.innerHTML = '<div class="empty-msg">Error al cargar libros.</div>'; return; }
 
-    const books = (data || []).filter(b => {
-      const t = (b.titulo || '').toLowerCase();
-      return !t.startsWith('libro_sample_') && !t.startsWith('libroprestamo_sample_');
+    // Deduplicación en cliente por título
+    const seenTitles = new Set();
+    const books = [];
+
+    (data || []).forEach(b => {
+      const t = (b.titulo || '').toLowerCase().trim();
+      if (!t || t.startsWith('libro_sample_') || t.startsWith('libroprestamo_sample_')) return;
+      if (seenTitles.has(t)) return; // Evita mostrar duplicados
+      seenTitles.add(t);
+      books.push(b);
     });
 
     document.getElementById('libros-count').textContent = books.length;
@@ -801,27 +889,35 @@
 
   async function loadCategorias() {
     const { data } = await db.from('categorias').select('*').order('nombre');
-    const sel = document.getElementById('book-cat-filter');
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">Todas las categorías</option>';
+    const selFilter = document.getElementById('book-cat-filter');
+    const selNewBook = document.getElementById('new-book-cat');
+    const cur = selFilter.value;
+
+    selFilter.innerHTML = '<option value="">Todas las categorías</option>';
+    if (selNewBook) selNewBook.innerHTML = '';
+
     (data || []).forEach(c => {
-      const o = document.createElement('option');
-      o.value = c.nombre; o.textContent = c.nombre;
-      sel.appendChild(o);
+      const o1 = document.createElement('option');
+      o1.value = c.nombre; o1.textContent = c.nombre;
+      selFilter.appendChild(o1);
+
+      if (selNewBook) {
+        const o2 = document.createElement('option');
+        o2.value = c.nombre; o2.textContent = c.nombre;
+        selNewBook.appendChild(o2);
+      }
     });
-    if (cur) sel.value = cur;
+    if (cur) selFilter.value = cur;
   }
 
   /* ===================== MODAL LIBRO ===================== */
   async function openBookModal(bookId) {
     currentBookId = bookId;
 
-    // Reset msg
     const msgEl = document.getElementById('m-book-msg');
     msgEl.style.display = 'none';
     msgEl.textContent = '';
 
-    // Fetch libro
     const { data: book, error } = await db.from('libros').select('*').eq('id', bookId).single();
     if (error || !book) return;
 
@@ -837,12 +933,10 @@
     const kw = Array.isArray(book.palabras_clave) ? book.palabras_clave.join(', ') : (book.palabras_clave || '—');
     document.getElementById('m-book-keywords').textContent = kw;
 
-    // Cargar préstamos del libro
     const { data: allLoans } = await db.from('prestamos').select('*, usuarios(nombre)').eq('libro_id', bookId).order('id', { ascending: false });
     const activeLoans = (allLoans || []).filter(isActive);
     document.getElementById('m-book-loans').textContent = activeLoans.length;
 
-    // Mostrar info préstamo activo
     const infoBox = document.getElementById('m-active-loan-info');
     const infoContent = document.getElementById('m-active-loan-content');
     if (activeLoans.length) {
@@ -860,7 +954,6 @@
       infoBox.style.display = 'none';
     }
 
-    // Populate user selector
     const sel = document.getElementById('m-user-select');
     sel.innerHTML = '<option value="">Seleccionar usuario…</option>';
     const activeUserId = activeLoans.length ? activeLoans[0].usuario_id : null;
@@ -872,7 +965,6 @@
       sel.appendChild(o);
     });
 
-    // Habilitar/deshabilitar botones
     document.getElementById('btn-prestar').disabled = !avail;
     document.getElementById('btn-devolver').disabled = activeLoans.length === 0;
 
@@ -887,15 +979,13 @@
     document.getElementById('btn-prestar').disabled = true;
 
     try {
-      // INSERT préstamo con tipos correctos (parseInt para ids numéricos)
-      const { data: insertData, error: insertErr } = await db
+      const { error: insertErr } = await db
         .from('prestamos')
         .insert({
           usuario_id: parseInt(userId, 10),
           libro_id:   parseInt(currentBookId, 10),
           fecha_prestamo: today()
-        })
-        .select();
+        });
 
       if (insertErr) {
         showMsg('m-book-msg', `Error al registrar préstamo: ${insertErr.message}`, 'err');
@@ -903,7 +993,6 @@
         return;
       }
 
-      // UPDATE libro disponible = false
       const { error: updErr } = await db
         .from('libros')
         .update({ disponible: false })
@@ -929,7 +1018,6 @@
     document.getElementById('btn-devolver').disabled = true;
 
     try {
-      // Traer TODOS los préstamos del libro, filtrar activos en cliente
       const { data: allLoans, error: fetchErr } = await db
         .from('prestamos')
         .select('*')
@@ -977,6 +1065,7 @@
 
   /* ===================== MODAL USUARIO ===================== */
   async function openUserModal(userId) {
+    currentUserId = userId;
     const user = allUsers.find(u => u.id == userId);
     if (!user) return;
 
@@ -984,7 +1073,9 @@
     document.getElementById('m-user-type').textContent = `Tipo: ${user.tipo}`;
     document.getElementById('m-user-id').textContent = user.id;
 
-    // Préstamos activos del usuario
+    const msgEl = document.getElementById('m-user-msg');
+    if (msgEl) { msgEl.style.display = 'none'; msgEl.textContent = ''; }
+
     const { data: loans } = await db
       .from('prestamos')
       .select('*')
@@ -1000,7 +1091,6 @@
     if (!activeLoans.length) {
       loansList.innerHTML = '<div class="empty-msg">Sin préstamos activos.</div>';
     } else {
-      // Obtener datos de libros
       const libroIds = activeLoans.map(l => l.libro_id).filter(Boolean);
       const bookMap = new Map();
       if (libroIds.length) {
@@ -1041,24 +1131,138 @@
     document.getElementById('user-overlay').classList.add('open');
   }
 
+  /* ===================== AÑADIR USUARIO ===================== */
+  async function handleSaveUser() {
+    const name = document.getElementById('new-user-name').value.trim();
+    const type = document.getElementById('new-user-type').value;
+
+    if (!name) {
+      showMsg('add-user-msg', 'Por favor ingresa el nombre del usuario.', 'err');
+      return;
+    }
+
+    document.getElementById('btn-save-user').disabled = true;
+
+    try {
+      const { error } = await db.from('usuarios').insert({ nombre: name, tipo: type });
+      if (error) throw error;
+
+      showMsg('add-user-msg', '✓ Usuario creado exitosamente.', 'ok');
+      document.getElementById('new-user-name').value = '';
+      await loadUsuarios();
+
+      setTimeout(() => {
+        document.getElementById('add-user-overlay').classList.remove('open');
+        document.getElementById('btn-save-user').disabled = false;
+      }, 700);
+
+    } catch (e) {
+      showMsg('add-user-msg', `Error al crear usuario: ${e.message}`, 'err');
+      document.getElementById('btn-save-user').disabled = false;
+    }
+  }
+
+  /* ===================== ELIMINAR USUARIO ===================== */
+  async function handleDeleteUser() {
+    if (!currentUserId) return;
+    if (!confirm('¿Estás seguro de que deseas eliminar a este usuario?')) return;
+
+    try {
+      const { error } = await db.from('usuarios').delete().eq('id', currentUserId);
+      if (error) throw error;
+
+      closeModals();
+      await loadAll();
+    } catch (e) {
+      showMsg('m-user-msg', `Error al eliminar usuario: ${e.message}`, 'err');
+    }
+  }
+
+  /* ===================== AÑADIR LIBRO ===================== */
+  async function handleSaveBook() {
+    const title  = document.getElementById('new-book-title').value.trim();
+    const author = document.getElementById('new-book-author').value.trim();
+    const cat    = document.getElementById('new-book-cat').value;
+    const ed     = document.getElementById('new-book-ed').value.trim();
+    const kwRaw  = document.getElementById('new-book-kw').value.trim();
+
+    if (!title) {
+      showMsg('add-book-msg', 'Por favor ingresa el título del libro.', 'err');
+      return;
+    }
+
+    document.getElementById('btn-save-book').disabled = true;
+
+    const kwArr = kwRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+    try {
+      const { error } = await db.from('libros').insert({
+        titulo: title,
+        autor: author || 'Autor desconocido',
+        categoria: cat,
+        editorial: ed || '—',
+        palabras_clave: kwArr,
+        disponible: true
+      });
+
+      if (error) throw error;
+
+      showMsg('add-book-msg', '✓ Libro guardado exitosamente.', 'ok');
+      document.getElementById('new-book-title').value = '';
+      document.getElementById('new-book-author').value = '';
+      document.getElementById('new-book-ed').value = '';
+      document.getElementById('new-book-kw').value = '';
+      await loadLibros();
+
+      setTimeout(() => {
+        document.getElementById('add-book-overlay').classList.remove('open');
+        document.getElementById('btn-save-book').disabled = false;
+      }, 700);
+
+    } catch (e) {
+      showMsg('add-book-msg', `Error al crear libro: ${e.message}`, 'err');
+      document.getElementById('btn-save-book').disabled = false;
+    }
+  }
+
   /* ===================== CLOSE MODALS ===================== */
   function closeModals() {
     document.getElementById('book-overlay').classList.remove('open');
     document.getElementById('user-overlay').classList.remove('open');
+    document.getElementById('add-user-overlay').classList.remove('open');
+    document.getElementById('add-book-overlay').classList.remove('open');
     currentBookId = null;
+    currentUserId = null;
   }
 
   document.getElementById('close-book-modal').addEventListener('click', closeModals);
   document.getElementById('close-user-modal').addEventListener('click', closeModals);
+  document.getElementById('close-add-user-modal').addEventListener('click', closeModals);
+  document.getElementById('close-add-book-modal').addEventListener('click', closeModals);
+  document.getElementById('cancel-add-user').addEventListener('click', closeModals);
+  document.getElementById('cancel-add-book').addEventListener('click', closeModals);
 
-  document.getElementById('book-overlay').addEventListener('click', e => {
-    if (e.target.id === 'book-overlay') closeModals();
-  });
-  document.getElementById('user-overlay').addEventListener('click', e => {
-    if (e.target.id === 'user-overlay') closeModals();
-  });
+  document.getElementById('book-overlay').addEventListener('click', e => { if (e.target.id === 'book-overlay') closeModals(); });
+  document.getElementById('user-overlay').addEventListener('click', e => { if (e.target.id === 'user-overlay') closeModals(); });
+  document.getElementById('add-user-overlay').addEventListener('click', e => { if (e.target.id === 'add-user-overlay') closeModals(); });
+  document.getElementById('add-book-overlay').addEventListener('click', e => { if (e.target.id === 'add-book-overlay') closeModals(); });
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+
+  /* ===================== EVENT LISTENERS ===================== */
+  document.getElementById('btn-add-user-modal').addEventListener('click', () => {
+    document.getElementById('add-user-msg').style.display = 'none';
+    document.getElementById('add-user-overlay').classList.add('open');
+  });
+
+  document.getElementById('btn-add-book-modal').addEventListener('click', () => {
+    document.getElementById('add-book-msg').style.display = 'none';
+    document.getElementById('add-book-overlay').classList.add('open');
+  });
+
+  document.getElementById('btn-save-user').addEventListener('click', handleSaveUser);
+  document.getElementById('btn-save-book').addEventListener('click', handleSaveBook);
+  document.getElementById('btn-delete-user').addEventListener('click', handleDeleteUser);
 
   /* ===================== SEARCH ===================== */
   document.getElementById('btn-search').addEventListener('click', () => {
