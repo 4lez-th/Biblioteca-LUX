@@ -1,100 +1,61 @@
-DOCUMENTACIÓN - Biblioteca LUX (Supabase)
-=========================================
+DOCUMENTACIÓN - Biblioteca LUX (Supabase + GitHub)
+=================================================
 
-Resumen corto (en palabras sencillas)
--------------------------------------
-Este proyecto publica una interfaz web para gestionar una biblioteca. Los datos reales (usuarios, libros, categorías, préstamos) se guardarán en una base de datos Supabase. Tú, como administrador, podrás agregar y gestionar estos datos directamente desde la página usando el "Panel Admin".
+Resumen Corto
+-------------
+Este proyecto publica una interfaz web para gestionar la biblioteca LUX. Los datos reales (usuarios, libros, categorías y préstamos) se almacenan y sincronizan en tiempo real en una base de datos **Supabase**. La aplicación web está alojada y publicada mediante **GitHub Pages**.
 
-Archivos importantes
--------------------
-- `LIBRERIAlux.html`: Página web principal. Contiene el diseño, la lógica de cliente y el panel admin.
-- `LIBRERIAlux`      : Código Python con las clases del prototipo (sin datos de ejemplo).
-- `DOCUMENTACION_SUPABASE.md`: Este archivo con instrucciones.
+**Sitio Web Publicado**: https://4lez-th.github.io/Biblioteca-LUX/
 
-Esquema de la base de datos (sugerido)
--------------------------------------
-Crea estas tablas en Supabase (puedes usar SQL en la sección SQL editor):
+Archivos Importantes del Proyecto
+---------------------------------
+- `index.html` / `LIBRERIAlux.html`: Página web principal. Contiene la interfaz gráfica, estilos y la integración cliente con Supabase SDK.
+- `setup_supabase.sql`: Script SQL completo para crear la estructura de la base de datos (tablas `usuarios`, `categorias`, `libros`, `prestamos`), habilitar políticas de seguridad RLS y funciones atómicas RPC (`fn_prestar_libro`, `fn_devolver_libro`, etc.).
+- `LIBRERIAlux`: Código Python con las clases orientadas a objetos del prototipo (`Usuario`, `Libro`, `Prestamo`, `Reportes`).
+- `DOCUMENTACION_SUPABASE.md`: Este archivo con la guía técnica completa.
 
-1) usuarios
-```sql
-create table usuarios (
-  id serial primary key,
-  nombre text not null,
-  tipo text
-);
+Configuración de Supabase
+-------------------------
+El proyecto está conectado a Supabase con las siguientes credenciales configuradas en `index.html` y `LIBRERIAlux.html`:
+- **URL del proyecto**: `https://qzanordyttklascfmozy.supabase.co`
+- **Anon Key**: `sb_publishable_daIZivHp77OzgMgEDnvKQA_WVhqhCGK`
+
+Para desplegar o recrear la base de datos en un nuevo entorno Supabase:
+1. Ve al menú **SQL Editor** en tu panel de Supabase.
+2. Abre y copia todo el contenido del archivo `setup_supabase.sql`.
+3. Ejecuta el script (**Run**). Esto creará las 4 tablas, activará RLS y registrará las funciones de préstamos.
+
+Estructura de la Base de Datos (`setup_supabase.sql`)
+---------------------------------------------------
+1) **usuarios**: `id (bigserial)`, `nombre (text)`, `tipo (text)`, `created_at (timestamp)`
+2) **categorias**: `id (bigserial)`, `nombre (text unique)`, `created_at (timestamp)`
+3) **libros**: `id (bigserial)`, `titulo (text)`, `autor (text)`, `categoria (text)`, `editorial (text)`, `palabras_clave (jsonb)`, `disponible (boolean)`, `created_at (timestamp)`
+4) **prestamos**: `id (bigserial)`, `usuario_id (references usuarios)`, `libro_id (references libros)`, `fecha_prestamo (date)`, `fecha_devolucion (date)`, `dias_limite (integer)`, `created_at (timestamp)`
+
+Cómo usar la Interfaz Web
+-------------------------
+1. **Ver Libros y Buscar**: Usa la barra de búsqueda superior para filtrar por título o autor, o selecciona una categoría específica en el menú desplegable.
+2. **Prestar un Libro**:
+   - Haz clic en cualquier libro disponible en la lista para abrir su ventana modal de detalles.
+   - Selecciona el usuario en la lista desplegable.
+   - Pulsa el botón **"Prestar"**.
+3. **Devolver un Libro**:
+   - Haz clic en un libro actualmente prestado.
+   - Pulsa el botón **"Devolver"**.
+4. **Panel Admin (Gestión)**:
+   - Haz clic en **"Abrir panel admin"** en la parte superior.
+   - Agrega nuevos usuarios, libros o categorías. Los selectores de la página se actualizarán automáticamente.
+
+Despliegue y Repositorio en GitHub
+----------------------------------
+- **Repositorio**: `4lez-th/Biblioteca-LUX`
+- **Rama de despliegue**: `gh-pages`
+- **URL pública**: `https://4lez-th.github.io/Biblioteca-LUX/`
+
+Para subir y actualizar cambios a GitHub en el futuro:
+```bash
+git add .
+git commit -m "Actualización de la biblioteca"
+git push origin gh-pages
 ```
 
-2) categorias
-```sql
-create table categorias (
-  id serial primary key,
-  nombre text not null
-);
-```
-
-3) libros
-```sql
-create table libros (
-  id serial primary key,
-  titulo text not null,
-  autor text,
-  categoria text,
-  editorial text,
-  palabras_clave jsonb,
-  disponible boolean default true
-);
-```
-
-4) prestamos
-```sql
-create table prestamos (
-  id serial primary key,
-  usuario_id integer references usuarios(id),
-  libro_id integer references libros(id),
-  fecha_prestamo date,
-  fecha_devolucion date
-);
-```
-
-Configurar Supabase
--------------------
-1) Ve a https://app.supabase.com y crea un proyecto.
-2) En el proyecto, entra a "Settings -> API" y copia:
-   - URL del proyecto (algo como `https://xyz.supabase.co`)
-   - anon key (public)
-3) En la página web (biblioteca), pulsa "Configurar Supabase" y pega la URL y la anon key.
-   - Estos valores se guardan en `localStorage` de tu navegador.
-
-Cómo usar el Panel Admin (desde la web)
---------------------------------------
-- Pulsa "Abrir panel admin".
-- Agrega Usuarios: llena nombre y tipo (ej. estudiante, docente).
-- Agrega Libros: título, autor, categoría.
-- Agrega Categorías: nombre de la categoría.
-- Tras agregar, la lista de opciones en la página se actualiza automáticamente.
-
-Operaciones disponibles desde la interfaz
------------------------------------------
-- Prestar: selecciona Usuario, Libro y la acción "Prestar" y pulsa "Ejecutar acción".
-  - Inserta una fila en `prestamos` y marca `libros.disponible = false`.
-- Devolver: selecciona Usuario, Libro y la acción "Devolver" y pulsa "Ejecutar acción".
-  - Marca la fecha_devolucion en el préstamo y pone `libros.disponible = true`.
-- Consultar: selecciona categorías y la acción "Consultar" para ver libros que coincidan.
-
-Seguridad y notas
------------------
-- La página usa la anon key pública de Supabase. Eso es suficiente para operaciones de lectura/escritura si las reglas de RLS lo permiten. Para producción, configura Row Level Security (RLS) y políticas que restrinjan quién puede escribir o borrar.
-- Esta integración es para un prototipo y facilita administración desde el navegador. Para más seguridad, crea endpoints backend que firmen requests o controlen permisos.
-
-Si te falta algo
-----------------
-- Si quieres, puedo:
-  - Añadir validaciones más robustas en el panel Admin.
-  - Crear un pequeño backend que actúe como intermediario seguro.
-  - Generar scripts SQL para crear tablas automáticamente en Supabase.
-
-Contacto rápido
----------------
-- Dime si quieres que yo cree las tablas SQL por ti y las ejecute (necesitarás compartir acceso a Supabase o pegar el SQL en el editor).
-
-Gracias — listo para la siguiente parte cuando lo indiques.
