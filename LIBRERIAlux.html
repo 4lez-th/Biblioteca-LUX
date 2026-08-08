@@ -451,6 +451,7 @@
 <header class="topbar">
   <div class="topbar-title">📚 Biblioteca LUX</div>
   <div class="topbar-right">
+    <button class="btn btn-ghost btn-sm" id="btn-qr-modal" style="margin-right:6px">📱 Auto-registro QR</button>
     <div class="stats" id="top-stats">
       Libros: <strong id="stat-libros">—</strong> &bull;
       Usuarios: <strong id="stat-usuarios">—</strong>
@@ -501,7 +502,7 @@
     <section class="panel">
       <div class="panel-header">
         <span class="panel-title">Usuarios</span>
-        <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px">
           <span class="stats">Total: <strong id="usuarios-count">—</strong></span>
           <button class="btn btn-primary btn-sm" id="btn-add-user-modal">+ Añadir Usuario</button>
         </div>
@@ -517,7 +518,7 @@
     <section class="panel">
       <div class="panel-header">
         <span class="panel-title">Inventario de Libros</span>
-        <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px">
           <span class="stats">Total: <strong id="libros-count">—</strong></span>
           <button class="btn btn-primary btn-sm" id="btn-add-book-modal">+ Añadir Libro</button>
         </div>
@@ -687,6 +688,70 @@
         <button class="btn btn-primary" id="btn-save-book">Guardar Libro</button>
       </div>
       <div class="msg" id="add-book-msg" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CÓDIGO QR -->
+<div class="overlay" id="qr-overlay">
+  <div class="modal" style="max-width:440px;text-align:center">
+    <div class="modal-head">
+      <div>
+        <h2>📱 Auto-Registro con Código QR</h2>
+        <div class="sub">Escanea para que los estudiantes se registren ellos mismos</div>
+      </div>
+      <button class="modal-close" id="close-qr-modal">&times;</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;align-items:center;padding:24px">
+      <div style="background:#fff;padding:16px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);margin-bottom:16px">
+        <img id="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://4lez-th.github.io/Biblioteca-LUX/?registro=estudiante" alt="Código QR de Registro" style="width:200px;height:200px;display:block" />
+      </div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;line-height:1.4">
+        Escanea este código con la cámara de tu teléfono inteligente para abrir el formulario de registro de estudiantes en tiempo real.
+      </p>
+      <div style="display:flex;gap:8px;width:100%">
+        <button class="btn btn-ghost" id="btn-copy-qr-link" style="flex:1">📋 Copiar Enlace</button>
+        <button class="btn btn-primary" id="btn-test-self-reg" style="flex:1">🚀 Abrir Registro</button>
+      </div>
+      <div class="msg" id="qr-msg" style="margin-top:10px;width:100%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FORMULARIO AUTO-REGISTRO ESTUDIANTE -->
+<div class="overlay" id="self-register-overlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head">
+      <div>
+        <h2>🎓 Registro de Estudiante</h2>
+        <div class="sub">Bienvenido/a a la Biblioteca LUX</div>
+      </div>
+      <button class="modal-close" id="close-self-register-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="self-reg-form-box">
+        <div class="form-row" style="margin-bottom:14px;display:block">
+          <label style="display:block;margin-bottom:4px;font-weight:600;font-size:0.85rem">Escribe tu nombre completo *</label>
+          <input type="text" id="self-user-name" placeholder="Ej. Carlos Mendoza López" style="width:100%;font-size:0.95rem;padding:10px" />
+        </div>
+        <div class="form-row" style="margin-bottom:16px;display:block">
+          <label style="display:block;margin-bottom:4px;font-weight:600;font-size:0.85rem">Rol / Tipo</label>
+          <input type="text" id="self-user-type" value="Estudiante" readonly style="width:100%;background:var(--bg);opacity:0.8;cursor:not-allowed" />
+        </div>
+        <button class="btn btn-primary" id="btn-submit-self-reg" style="width:100%;padding:12px;font-size:0.95rem">
+          Registrarme en la Biblioteca
+        </button>
+        <div class="msg" id="self-reg-msg" style="margin-top:12px"></div>
+      </div>
+
+      <div id="self-reg-success-box" style="display:none;text-align:center;padding:20px 10px">
+        <div style="font-size:3rem;margin-bottom:10px">🎉</div>
+        <h3 style="font-size:1.2rem;margin-bottom:8px">¡Registro Completado!</h3>
+        <p style="font-size:0.9rem;color:var(--muted);margin-bottom:20px" id="self-reg-success-msg">
+          Ya estás registrado/a en la Biblioteca LUX. Puedes acudir a solicitar libros.
+        </p>
+        <button class="btn btn-primary" id="btn-close-self-success" style="width:100%">Entendido</button>
+      </div>
     </div>
   </div>
 </div>
@@ -896,14 +961,24 @@
     selFilter.innerHTML = '<option value="">Todas las categorías</option>';
     if (selNewBook) selNewBook.innerHTML = '';
 
+    const seenCats = new Set();
+
     (data || []).forEach(c => {
+      let name = (c.nombre || '').trim();
+      if (!name) return;
+
+      // Normalización inteligente para deduplicar ignorando tildes y mayúsculas
+      const key = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (seenCats.has(key)) return;
+      seenCats.add(key);
+
       const o1 = document.createElement('option');
-      o1.value = c.nombre; o1.textContent = c.nombre;
+      o1.value = name; o1.textContent = name;
       selFilter.appendChild(o1);
 
       if (selNewBook) {
         const o2 = document.createElement('option');
-        o2.value = c.nombre; o2.textContent = c.nombre;
+        o2.value = name; o2.textContent = name;
         selNewBook.appendChild(o2);
       }
     });
@@ -1131,7 +1206,7 @@
     document.getElementById('user-overlay').classList.add('open');
   }
 
-  /* ===================== AÑADIR USUARIO ===================== */
+  /* ===================== AÑADIR USUARIO (ADMIN) ===================== */
   async function handleSaveUser() {
     const name = document.getElementById('new-user-name').value.trim();
     const type = document.getElementById('new-user-type').value;
@@ -1159,6 +1234,34 @@
     } catch (e) {
       showMsg('add-user-msg', `Error al crear usuario: ${e.message}`, 'err');
       document.getElementById('btn-save-user').disabled = false;
+    }
+  }
+
+  /* ===================== AUTO-REGISTRO ESTUDIANTE (SELF-REGISTRATION) ===================== */
+  async function handleSubmitSelfReg() {
+    const name = document.getElementById('self-user-name').value.trim();
+
+    if (!name) {
+      showMsg('self-reg-msg', 'Ingresa tu nombre completo para continuar.', 'err');
+      return;
+    }
+
+    document.getElementById('btn-submit-self-reg').disabled = true;
+
+    try {
+      const { error } = await db.from('usuarios').insert({ nombre: name, tipo: 'Estudiante' });
+      if (error) throw error;
+
+      document.getElementById('self-reg-form-box').style.display = 'none';
+      document.getElementById('self-reg-success-msg').textContent = `¡Felicidades ${name}! Ya estás registrado/a como estudiante en la Biblioteca LUX.`;
+      document.getElementById('self-reg-success-box').style.display = 'block';
+
+      document.getElementById('self-user-name').value = '';
+      await loadUsuarios();
+
+    } catch (e) {
+      showMsg('self-reg-msg', `Error al registrarte: ${e.message}`, 'err');
+      document.getElementById('btn-submit-self-reg').disabled = false;
     }
   }
 
@@ -1231,6 +1334,8 @@
     document.getElementById('user-overlay').classList.remove('open');
     document.getElementById('add-user-overlay').classList.remove('open');
     document.getElementById('add-book-overlay').classList.remove('open');
+    document.getElementById('qr-overlay').classList.remove('open');
+    document.getElementById('self-register-overlay').classList.remove('open');
     currentBookId = null;
     currentUserId = null;
   }
@@ -1239,13 +1344,24 @@
   document.getElementById('close-user-modal').addEventListener('click', closeModals);
   document.getElementById('close-add-user-modal').addEventListener('click', closeModals);
   document.getElementById('close-add-book-modal').addEventListener('click', closeModals);
+  document.getElementById('close-qr-modal').addEventListener('click', closeModals);
+  document.getElementById('close-self-register-modal').addEventListener('click', closeModals);
   document.getElementById('cancel-add-user').addEventListener('click', closeModals);
   document.getElementById('cancel-add-book').addEventListener('click', closeModals);
+
+  document.getElementById('btn-close-self-success').addEventListener('click', () => {
+    closeModals();
+    document.getElementById('self-reg-form-box').style.display = 'block';
+    document.getElementById('self-reg-success-box').style.display = 'none';
+    document.getElementById('btn-submit-self-reg').disabled = false;
+  });
 
   document.getElementById('book-overlay').addEventListener('click', e => { if (e.target.id === 'book-overlay') closeModals(); });
   document.getElementById('user-overlay').addEventListener('click', e => { if (e.target.id === 'user-overlay') closeModals(); });
   document.getElementById('add-user-overlay').addEventListener('click', e => { if (e.target.id === 'add-user-overlay') closeModals(); });
   document.getElementById('add-book-overlay').addEventListener('click', e => { if (e.target.id === 'add-book-overlay') closeModals(); });
+  document.getElementById('qr-overlay').addEventListener('click', e => { if (e.target.id === 'qr-overlay') closeModals(); });
+  document.getElementById('self-register-overlay').addEventListener('click', e => { if (e.target.id === 'self-register-overlay') closeModals(); });
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
 
@@ -1260,9 +1376,32 @@
     document.getElementById('add-book-overlay').classList.add('open');
   });
 
+  document.getElementById('btn-qr-modal').addEventListener('click', () => {
+    document.getElementById('qr-msg').style.display = 'none';
+    document.getElementById('qr-overlay').classList.add('open');
+  });
+
+  document.getElementById('btn-copy-qr-link').addEventListener('click', () => {
+    const link = 'https://4lez-th.github.io/Biblioteca-LUX/?registro=estudiante';
+    navigator.clipboard.writeText(link).then(() => {
+      showMsg('qr-msg', '✓ Enlace de auto-registro copiado al portapapeles.', 'ok');
+    }).catch(() => {
+      showMsg('qr-msg', `Copiar enlace: ${link}`, 'info');
+    });
+  });
+
+  document.getElementById('btn-test-self-reg').addEventListener('click', () => {
+    closeModals();
+    document.getElementById('self-reg-form-box').style.display = 'block';
+    document.getElementById('self-reg-success-box').style.display = 'none';
+    document.getElementById('btn-submit-self-reg').disabled = false;
+    document.getElementById('self-register-overlay').classList.add('open');
+  });
+
   document.getElementById('btn-save-user').addEventListener('click', handleSaveUser);
   document.getElementById('btn-save-book').addEventListener('click', handleSaveBook);
   document.getElementById('btn-delete-user').addEventListener('click', handleDeleteUser);
+  document.getElementById('btn-submit-self-reg').addEventListener('click', handleSubmitSelfReg);
 
   /* ===================== SEARCH ===================== */
   document.getElementById('btn-search').addEventListener('click', () => {
@@ -1291,6 +1430,14 @@
   /* ===================== PRESTAR / DEVOLVER ===================== */
   document.getElementById('btn-prestar').addEventListener('click', handlePrestar);
   document.getElementById('btn-devolver').addEventListener('click', handleDevolver);
+
+  /* ===================== URL AUTO-TRIGGER DE REGISTRO ===================== */
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('registro') === 'estudiante' || urlParams.get('auto_registro') === 'true') {
+    document.getElementById('self-reg-form-box').style.display = 'block';
+    document.getElementById('self-reg-success-box').style.display = 'none';
+    document.getElementById('self-register-overlay').classList.add('open');
+  }
 
   /* ===================== INIT ===================== */
   await loadAll();
